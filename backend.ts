@@ -1,26 +1,31 @@
 import {WsService} from "./services/WsService.js";
-
 import {createRequire} from "module";
-import { RawData } from "ws";
-import {AbstractEvent} from "./ws-events/AbstractEvent";
+import {fileURLToPath} from "url";
 
 const require = createRequire(import.meta.url);
-
-const http = require("http");
 const path = require("path");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const http = require("http");
 const express = require("express");
 const webSocket = require("ws");
 
 const app = express();
 const server = http.createServer(app);
 const wsService = new WsService();
+const appDir = path.resolve(__dirname, "frontend/")
 
 function run() {
-    app.use("/static", express.static(path.resolve("frontend", "static")));
+    //routes where to use static files
+    app.use('/canvas',express.static(appDir));
+    // app.get("/*", ((req, res) => {
+    //     res.sendFile(path.resolve(__dirname, "frontend", "index.html"))
+    // }));
 
-    app.get("/*", ((req, res) => {
-        res.sendFile(path.resolve("frontend", "index.html"))
-    }));
+
+    app.get('*', function (req, res) {
+        res.sendFile(path.resolve(appDir, "index.html"));
+    })
 
 
     const wss = new webSocket.Server({server: server});

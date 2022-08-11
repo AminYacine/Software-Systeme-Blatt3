@@ -29,7 +29,7 @@ const router = async () => {
         else {
             return {
                 route: route,
-                isMatch: false
+                isMatch: true
             }
         }
     });

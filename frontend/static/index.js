@@ -15,7 +15,8 @@ const router = async () => {
             console.log("pathname:", location.pathname);
             return {
                 route: route,
-                isMatch: /^\/canvas\/[0-9]{0,9}$/.test(location.pathname),
+                isMatch: /^\/canvas\//.test(location.pathname),
+                ///^\/canvas\/[0-9]{0,9}$/
             };
         }
         else if (route.path === "/") {
@@ -27,7 +28,7 @@ const router = async () => {
         else {
             return {
                 route: route,
-                isMatch: false
+                isMatch: true
             };
         }
     });
