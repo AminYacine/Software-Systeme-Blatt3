@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <title>Zeichenprogramm</title>
+    <link rel="stylesheet" href="style.css" type="text/css"/>
+
+    <script src="types.js" type="module"></script>
+    <script src="Shapes.js" type="module"></script>
+    <script src="ToolArea.js" type="module"></script>
+    <script src="Canvas.js" type="module"></script>
+    <script src="Event.js" type="module"></script>
+    <script src="init.js" type="module"></script>
+
+<body>
+
+<p>Wählen Sie auf der linken Seite Ihr Zeichenwerkzeug aus.
+    Haben Sie eines ausgewählt, können Sie mit der Maus
+    die entsprechenden Figuren zeichnen. Typischerweise, indem
+    Sie die Maus drücken, dann mit gedrückter Maustaste die
+    Form bestimmen, und dann anschließend die Maustaste loslassen.
+    <label for="eventInput"></label><input id="eventInput" type="text" placeholder="Type new event">
+    <button id="eventButton">Add event</button>
+</p>
+
+<ul class="tools"></ul>
+
+
+<canvas id="backgroundArea" width="900" height="800"></canvas>
+<canvas id="creationArea" width="900" height="800"></canvas>
+
+
+
+
+</body>
+</html>

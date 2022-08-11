@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "module": "es2020",
+    "target": "es2020",
+    "sourceMap": true,
+    "lib": [
+      "dom"
+    ],
+    "allowSyntheticDefaultImports": true
+  },
+  "exclude": [
+    "node_modules"
+  ],
+}
