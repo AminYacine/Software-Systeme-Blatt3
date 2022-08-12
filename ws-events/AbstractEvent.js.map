@@ -1,1 +1,1 @@
-{"version":3,"file":"AbstractEvent.js","sourceRoot":"","sources":["AbstractEvent.ts"],"names":[],"mappings":"AAEA,MAAM,OAAO,aAAa;IAEtB,YAAmB,IAAc,EAAS,KAAU;QAAjC,SAAI,GAAJ,IAAI,CAAU;QAAS,UAAK,GAAL,KAAK,CAAK;IACpD,CAAC;CACJ"}
+{"version":3,"file":"AbstractEvent.js","sourceRoot":"","sources":["AbstractEvent.ts"],"names":[],"mappings":"AAEA,MAAM,OAAO,aAAa;IAEtB,YAAmB,IAAqB,EAAS,KAAU;QAAxC,SAAI,GAAJ,IAAI,CAAiB;QAAS,UAAK,GAAL,KAAK,CAAK;IAC3D,CAAC;CACJ"}

@@ -5,7 +5,7 @@ import {CanvasView} from "./canvasView.js";
 import {NotFoundView} from "./notFoundView.js";
 
 //source: https://www.youtube.com/watch?v=6BozpmSjk-Y&ab_channel=dcode
-const router = async () => {
+export const router = async () => {
     const routes = [
         {path: "/", view: Overview},
         {path: "/canvas", view: CanvasView},
@@ -14,7 +14,6 @@ const router = async () => {
 
     const potentialMatches = routes.map((route) => {
         if (route.path === "/canvas") {
-            console.log("pathname:", location.pathname)
             return {
                 route: route,
                 isMatch: /^\/canvas\//.test(location.pathname),
@@ -48,8 +47,7 @@ const router = async () => {
         init();
     }
     else if (view instanceof Overview) {
-        console.log("in overview");
-        wss.initCreateCanvas();
+        wss.initOverviewUI();
     }
 };
 

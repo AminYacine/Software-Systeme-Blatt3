@@ -1,6 +1,5 @@
 import * as WebSocket from "ws";
-import {Shape} from "../frontend/static/types.js";
-import {CanvasEvent, EventTypes} from "../frontend/static/Event";
+import {CanvasEvent} from "./Event.js";
 
 
 export class CanvasRoom {
@@ -10,7 +9,7 @@ export class CanvasRoom {
     private shapesInCanvas: Map<number, CanvasEvent> = new Map();
 
 
-    constructor(private name: string) {
+    constructor(public name: string) {
         this.id = CanvasRoom.counter++;
     }
 

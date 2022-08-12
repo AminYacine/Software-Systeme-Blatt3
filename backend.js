@@ -13,7 +13,9 @@ const server = http.createServer(app);
 const wsService = new WsService();
 const appDir = path.resolve(__dirname, "frontend/");
 function run() {
+    //routes where to use static files
     app.use('/canvas', express.static(appDir));
+    app.use('/', express.static(appDir));
     // app.get("/*", ((req, res) => {
     //     res.sendFile(path.resolve(__dirname, "frontend", "index.html"))
     // }));
@@ -22,11 +24,7 @@ function run() {
     });
     const wss = new webSocket.Server({ server: server });
     wss.on("connection", function (client) {
-        const id = wsService.addClient(client);
-        client.send(JSON.stringify({
-            "type": "ClientId",
-            "data": { "clientId": id },
-        }));
+        wsService.handleConnection(client);
         client.on("message", (message) => {
             wsService.handleMessage(message.toString(), client);
         });

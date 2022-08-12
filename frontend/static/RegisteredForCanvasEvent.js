@@ -1,7 +1,7 @@
-export class RegisteredForCanvas {
+export class RegisteredForCanvasEvent {
     constructor(canvasId, eventsForCanvas) {
         this.canvasId = canvasId;
         this.eventsForCanvas = eventsForCanvas;
     }
 }
-//# sourceMappingURL=RegisteredForCanvas.js.map
+//# sourceMappingURL=RegisteredForCanvasEvent.js.map

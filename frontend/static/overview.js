@@ -9,7 +9,7 @@ export class Overview {
         </div>
         <div> Available canvas rooms:
             <ul id="rooms">
-                <li>first room: 12316548764</li>
+                
         </ul>
         </div>
         </body>

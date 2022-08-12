@@ -1,4 +1,4 @@
-class RegisterForCanvas {
+export class RegisterForCanvas {
     constructor(canvasId) {
         this.canvasId = canvasId;
     }

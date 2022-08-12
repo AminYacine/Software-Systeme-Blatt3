@@ -1,6 +1,6 @@
 import {CanvasEvent} from "./Event.js";
 
-export class RegisteredForCanvas  {
+export class RegisteredForCanvasEvent {
     constructor(public canvasId: number, public eventsForCanvas: CanvasEvent[]) {
     }
 

@@ -1,51 +1,80 @@
 import { WebSocketEvents } from "./WebSocketEvents.js";
+import { AbstractEvent } from "./AbstractEvent.js";
+import { router } from "./index.js";
+import { RegisterForCanvas } from "./RegisterForCanvas.js";
 export class WebSocketService {
     constructor() {
+        this.openRooms = [];
     }
     openConnection() {
         this.ws = new WebSocket('ws://localhost:8080/web-socket');
-        console.log("ready state: ", this.ws.readyState);
         this.ws.onopen = (event) => {
             console.log("Open", event.type);
         };
         this.ws.onclose = (event) => {
             console.log("Close", event);
         };
-        this.ws.onmessage = (event) => {
-            let msg = JSON.parse(event.data);
+        this.ws.onmessage = (message) => {
+            let msg = JSON.parse(message.data);
             switch (msg.type) {
                 case WebSocketEvents.CanvasCreated: {
-                    console.log("CLIENT: received canvas created");
-                    location.replace("/canvas");
+                    const createdEvent = msg.value;
+                    console.log("received canvas created", createdEvent);
+                    window.history.pushState("", "", `/canvas/${createdEvent.id}`);
+                    router();
                     break;
                 }
                 case WebSocketEvents.RegisteredForCanvas: {
-                    const registerEvent = msg.value;
+                    console.log("registered For canvas");
+                    const registeredEvent = msg.value;
+                    window.history.pushState("", "", `/canvas/${registeredEvent.canvasId}`);
+                    router();
                     break;
                 }
                 case WebSocketEvents.ClientId: {
-                    console.log("received id", event.data);
+                    const connectedEvent = msg.value;
+                    this.openRooms = connectedEvent.openRooms;
+                    this.updateRoomListInHtml();
                     break;
                 }
                 default: {
-                    console.log("message", event.data);
+                    console.log("message", message.data);
                 }
             }
         };
     }
-    initCreateCanvas() {
+    initOverviewUI() {
         const name = document.getElementById("roomName");
         const button = document.getElementById("newRoomButton");
         button.addEventListener("click", (ev) => {
-            console.log("click");
             if (name.value) {
                 console.log("input valid");
-                this.ws.send(JSON.stringify({
-                    "type": WebSocketEvents.CreateCanvas,
-                    "value": name.value,
-                }));
+                this.sendCreateCanvasEvent(name.value);
             }
         });
+    }
+    updateRoomListInHtml() {
+        //only needs to be rendered if current page is overview
+        if (window.location.pathname === '/') {
+            const list = document.getElementById("rooms");
+            //remove every list item to fill with current ones
+            while (list.firstChild) {
+                list.removeChild(list.firstChild);
+            }
+            this.openRooms.forEach(room => {
+                const listElem = document.createElement("li");
+                listElem.innerHTML = `${room.name} (${room.id})`;
+                listElem.setAttribute("class", "clickable");
+                listElem.addEventListener("click", () => this.sendRegisterForCanvas(room.id));
+                list.appendChild(listElem);
+            });
+        }
+    }
+    sendCreateCanvasEvent(canvasName) {
+        this.ws.send(JSON.stringify(new AbstractEvent(WebSocketEvents.CreateCanvas, canvasName)));
+    }
+    sendRegisterForCanvas(canvasId) {
+        this.ws.send(JSON.stringify(new AbstractEvent(WebSocketEvents.RegisterForCanvas, new RegisterForCanvas(canvasId))));
     }
 }
 //# sourceMappingURL=WebSocketService.js.map
