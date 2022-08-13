@@ -6,5 +6,6 @@ export var WebSocketEvents;
     WebSocketEvents["ClientId"] = "ClientId";
     WebSocketEvents["CreateCanvas"] = "CreateCanvas";
     WebSocketEvents["CanvasCreated"] = "CanvasCreated";
+    WebSocketEvents["GetOpenRooms"] = "GetOpenRooms";
 })(WebSocketEvents || (WebSocketEvents = {}));
 //# sourceMappingURL=WebSocketEvents.js.map

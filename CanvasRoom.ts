@@ -1,5 +1,6 @@
 import * as WebSocket from "ws";
-import {CanvasEvent} from "./Event.js";
+import {v4} from "uuid";
+import {CanvasEvent} from "./frontend/static/Event";
 
 export class CanvasRoom {
     private static counter = 0;
@@ -8,8 +9,9 @@ export class CanvasRoom {
     private shapesInCanvas: Map<string, CanvasEvent> = new Map();
 
 
-    constructor(public name: string, id: string) {
-        this.id = id;
+    constructor(public name: string) {
+
+        this.id = v4();
     }
 
     addSession(session: WebSocket) {

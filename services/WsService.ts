@@ -1,16 +1,17 @@
 import * as WebSocket from "ws";
-import {CanvasRoom} from "../frontend/static/CanvasRoom.js";
 import {AbstractEvent} from "../ws-events/AbstractEvent.js";
 import {RegisteredForCanvasEvent} from "../frontend/static/RegisteredForCanvasEvent.js";
 import {CanvasCreatedEvent} from "../ws-events/CanvasCreatedEvent.js";
 import {WebSocketEvents} from "../frontend/static/WebSocketEvents.js";
-import {ConnectedEvent} from "../frontend/static/ConnectedEvent.js";
+
 import {RegisterForCanvas} from "../frontend/static/RegisterForCanvas.js";
+import {CanvasRoom} from "../CanvasRoom.js";
+import {ConnectedEvent} from "../ConnectedEvent";
 
 export class WsService {
     private clientIdCounter = 0;
     private clients: Map<number, WebSocket> = new Map<number, WebSocket>();
-    private canvasRooms: Map<number, CanvasRoom> = new Map<number, CanvasRoom>();
+    private canvasRooms: Map<string, CanvasRoom> = new Map();
 
     constructor() {
     }
@@ -40,8 +41,6 @@ export class WsService {
                 console.log("server: got register event", canvasId);
                 if (canvasId !== undefined) {
                     const room = this.canvasRooms.get(canvasId);
-                    console.log("found Room:", room);
-                    console.log("all Rooms:", this.canvasRooms);
 
                     if (room) {
                         room.addSession(client);
@@ -67,7 +66,6 @@ export class WsService {
             WebSocketEvents.ClientId,
             new ConnectedEvent(id, Array.from(this.canvasRooms.values()))
         )));
-
     }
 
     private addClient(ws: WebSocket.WebSocket): number {

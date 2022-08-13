@@ -1,7 +1,7 @@
 import {CanvasEvent} from "./Event.js";
 
 export class RegisteredForCanvasEvent {
-    constructor(public canvasId: number, public eventsForCanvas: CanvasEvent[]) {
+    constructor(public canvasId: string, public eventsForCanvas: CanvasEvent[]) {
     }
 
 }

@@ -1,12 +1,13 @@
 import { WebSocketEvents } from "./WebSocketEvents.js";
 import { AbstractEvent } from "./AbstractEvent.js";
 import { router } from "./index.js";
+import { CanvasRoom } from "./CanvasRoom.js";
 import { RegisterForCanvas } from "./RegisterForCanvas.js";
 export class WebSocketService {
     constructor() {
         this.openRooms = [];
     }
-    openConnection() {
+    async openConnection() {
         this.ws = new WebSocket('ws://localhost:8080/web-socket');
         this.ws.onopen = (event) => {
             console.log("Open", event.type);
@@ -20,6 +21,7 @@ export class WebSocketService {
                 case WebSocketEvents.CanvasCreated: {
                     const createdEvent = msg.value;
                     console.log("received canvas created", createdEvent);
+                    this.openRooms.push(new CanvasRoom(createdEvent.name, createdEvent.id));
                     window.history.pushState("", "", `/canvas/${createdEvent.id}`);
                     router();
                     break;
@@ -33,6 +35,7 @@ export class WebSocketService {
                 }
                 case WebSocketEvents.ClientId: {
                     const connectedEvent = msg.value;
+                    this.clientId = connectedEvent.clientId;
                     this.openRooms = connectedEvent.openRooms;
                     this.updateRoomListInHtml();
                     break;
@@ -42,6 +45,7 @@ export class WebSocketService {
                 }
             }
         };
+        await this.waitForSocketConnection();
     }
     initOverviewUI() {
         const name = document.getElementById("roomName");
@@ -52,6 +56,29 @@ export class WebSocketService {
                 this.sendCreateCanvasEvent(name.value);
             }
         });
+    }
+    containsRoom(roomId) {
+        console.log("in containsRoom");
+        const foundRoom = this.openRooms.find(room => roomId === room.id);
+        return foundRoom !== undefined;
+    }
+    waitForSocketConnection() {
+        return new Promise(((resolve, reject) => {
+            const maxNumberOfAttempts = 10;
+            const intervalTimeInMs = 400;
+            let currentAttempt = 0;
+            const interval = setInterval(() => {
+                if (currentAttempt > maxNumberOfAttempts - 1) {
+                    clearInterval(interval);
+                    reject("Maximum number of attempts exceeded");
+                }
+                else if (this.ws.readyState === WebSocket.OPEN) {
+                    clearInterval(interval);
+                    resolve("");
+                }
+                currentAttempt++;
+            }, intervalTimeInMs);
+        }));
     }
     updateRoomListInHtml() {
         //only needs to be rendered if current page is overview

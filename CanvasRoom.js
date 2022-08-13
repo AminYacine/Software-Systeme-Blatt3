@@ -1,9 +1,10 @@
+import { v4 } from "uuid";
 export class CanvasRoom {
-    constructor(name, id) {
+    constructor(name) {
         this.name = name;
         this.clients = [];
         this.shapesInCanvas = new Map();
-        this.id = id;
+        this.id = v4();
     }
     addSession(session) {
         this.clients.push(session);

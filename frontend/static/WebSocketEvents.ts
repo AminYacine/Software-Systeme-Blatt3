@@ -5,4 +5,5 @@ export enum WebSocketEvents {
     ClientId = "ClientId",
     CreateCanvas = "CreateCanvas",
     CanvasCreated = "CanvasCreated",
+    GetOpenRooms = "GetOpenRooms",
 }

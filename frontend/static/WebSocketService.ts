@@ -10,11 +10,12 @@ import {RegisterForCanvas} from "./RegisterForCanvas.js";
 export class WebSocketService {
     ws: WebSocket;
     openRooms: CanvasRoom [] = [];
+    clientId: number;
 
     constructor() {
     }
 
-    openConnection() {
+   async openConnection() {
         this.ws = new WebSocket('ws://localhost:8080/web-socket');
 
         this.ws.onopen = (event) => {
@@ -29,8 +30,9 @@ export class WebSocketService {
 
             switch (msg.type) {
                 case WebSocketEvents.CanvasCreated: {
-                    const createdEvent : CanvasCreatedEvent = msg.value;
+                    const createdEvent: CanvasCreatedEvent = msg.value;
                     console.log("received canvas created", createdEvent);
+                    this.openRooms.push(new CanvasRoom(createdEvent.name, createdEvent.id));
                     window.history.pushState("", "", `/canvas/${createdEvent.id}`);
                     router();
                     break;
@@ -40,11 +42,11 @@ export class WebSocketService {
                     const registeredEvent: RegisteredForCanvasEvent = msg.value;
                     window.history.pushState("", "", `/canvas/${registeredEvent.canvasId}`);
                     router();
-
                     break;
                 }
                 case WebSocketEvents.ClientId: {
                     const connectedEvent: ConnectedEvent = msg.value;
+                    this.clientId = connectedEvent.clientId;
                     this.openRooms = connectedEvent.openRooms;
                     this.updateRoomListInHtml();
                     break;
@@ -53,8 +55,8 @@ export class WebSocketService {
                     console.log("message", message.data);
                 }
             }
-
         }
+        await this.waitForSocketConnection();
     }
 
     initOverviewUI() {
@@ -67,6 +69,33 @@ export class WebSocketService {
                 this.sendCreateCanvasEvent(name.value);
             }
         });
+    }
+
+
+    containsRoom(roomId: string):boolean {
+        console.log("in containsRoom")
+        const foundRoom =  this.openRooms.find(room =>  roomId === room.id);
+        return foundRoom !== undefined;
+    }
+
+     waitForSocketConnection(): Promise<any> {
+       return new Promise(((resolve, reject) => {
+           const maxNumberOfAttempts = 10;
+           const intervalTimeInMs = 400;
+
+           let currentAttempt = 0;
+           const interval = setInterval(() => {
+               if (currentAttempt > maxNumberOfAttempts -1) {
+                   clearInterval(interval);
+                   reject("Maximum number of attempts exceeded");
+               }
+               else if (this.ws.readyState === WebSocket.OPEN) {
+                   clearInterval(interval);
+                   resolve("");
+               }
+               currentAttempt++;
+           }, intervalTimeInMs);
+       }));
     }
 
     private updateRoomListInHtml() {
@@ -97,7 +126,7 @@ export class WebSocketService {
         ));
     }
 
-    private sendRegisterForCanvas(canvasId: number) {
+    private sendRegisterForCanvas(canvasId: string) {
         this.ws.send(JSON.stringify(
             new AbstractEvent(
                 WebSocketEvents.RegisterForCanvas,
