@@ -2,27 +2,24 @@ import { v4 } from "uuid";
 export class CanvasRoom {
     constructor(name) {
         this.name = name;
-        this.clients = [];
+        this.clients = new Map();
         this.shapesInCanvas = new Map();
         this.id = v4();
     }
-    addSession(session) {
-        this.clients.push(session);
+    addSession(id, session) {
+        this.clients.set(id, session);
     }
-    removeSession(session) {
-        this.clients = this.clients.filter((ws) => {
-            return ws !== session;
-        });
+    removeSession(clientId) {
+        this.clients.delete(clientId);
     }
     addEvent(id, canvasEvent) {
         this.shapesInCanvas.set(id, canvasEvent);
     }
-    removeShape(id) {
+    removeEvent(id) {
         this.shapesInCanvas.delete(id);
     }
     getCurrentEvents() {
         return Array.from(this.shapesInCanvas.values());
     }
 }
-CanvasRoom.counter = 0;
 //# sourceMappingURL=CanvasRoom.js.map

@@ -3,9 +3,10 @@ export var WebSocketEvents;
     WebSocketEvents["RegisterForCanvas"] = "RegisterForCanvas";
     WebSocketEvents["RegisteredForCanvas"] = "RegisteredForCanvas";
     WebSocketEvents["CanvasEvent"] = "CanvasEvent";
-    WebSocketEvents["ClientId"] = "ClientId";
+    WebSocketEvents["CreatedClientId"] = "CreatedClientId";
+    WebSocketEvents["SessionID"] = "SessionID";
     WebSocketEvents["CreateCanvas"] = "CreateCanvas";
     WebSocketEvents["CanvasCreated"] = "CanvasCreated";
-    WebSocketEvents["GetOpenRooms"] = "GetOpenRooms";
+    WebSocketEvents["DeregisterForCanvas"] = "DeregisterForCanvas";
 })(WebSocketEvents || (WebSocketEvents = {}));
 //# sourceMappingURL=WebSocketEvents.js.map

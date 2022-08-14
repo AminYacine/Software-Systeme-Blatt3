@@ -1,5 +1,5 @@
 
 export class RegisterForCanvas {
-    constructor(public canvasId: string) {}
+    constructor(public clientId: number, public canvasId: string) {}
 
 }

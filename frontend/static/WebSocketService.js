@@ -3,6 +3,8 @@ import { AbstractEvent } from "./AbstractEvent.js";
 import { router } from "./index.js";
 import { CanvasRoom } from "./CanvasRoom.js";
 import { RegisterForCanvas } from "./RegisterForCanvas.js";
+import { CreateCanvasEvent } from "./CreateCanvasEvent.js";
+import { DeregisterFromCanvasEvent } from "./DeregisterFromCanvasEvent.js";
 export class WebSocketService {
     constructor() {
         this.openRooms = [];
@@ -29,13 +31,19 @@ export class WebSocketService {
                 case WebSocketEvents.RegisteredForCanvas: {
                     console.log("registered For canvas");
                     const registeredEvent = msg.value;
+                    this.setCurrentCanvasRoom(registeredEvent.canvasId);
                     window.history.pushState("", "", `/canvas/${registeredEvent.canvasId}`);
                     router();
                     break;
                 }
-                case WebSocketEvents.ClientId: {
+                case WebSocketEvents.CreatedClientId: {
                     const connectedEvent = msg.value;
-                    this.clientId = connectedEvent.clientId;
+                    const currentClientID = this.getClientId();
+                    if (!currentClientID) {
+                        console.log("noch keine id");
+                        this.setClientId(connectedEvent.clientId);
+                    }
+                    this.ws.send(JSON.stringify(new AbstractEvent(WebSocketEvents.SessionID, this.getClientId())));
                     this.openRooms = connectedEvent.openRooms;
                     this.updateRoomListInHtml();
                     break;
@@ -98,10 +106,30 @@ export class WebSocketService {
         }
     }
     sendCreateCanvasEvent(canvasName) {
-        this.ws.send(JSON.stringify(new AbstractEvent(WebSocketEvents.CreateCanvas, canvasName)));
+        this.ws.send(JSON.stringify(new AbstractEvent(WebSocketEvents.CreateCanvas, new CreateCanvasEvent(canvasName, this.getClientId()))));
     }
     sendRegisterForCanvas(canvasId) {
-        this.ws.send(JSON.stringify(new AbstractEvent(WebSocketEvents.RegisterForCanvas, new RegisterForCanvas(canvasId))));
+        this.ws.send(JSON.stringify(new AbstractEvent(WebSocketEvents.RegisterForCanvas, new RegisterForCanvas(this.getClientId(), canvasId))));
+    }
+    getClientId() {
+        const clientId = sessionStorage.getItem("clientID");
+        return Number(clientId);
+    }
+    setClientId(clientId) {
+        console.log("clientId set:", clientId);
+        sessionStorage.setItem("clientID", clientId.toString());
+    }
+    setCurrentCanvasRoom(canvasId) {
+        sessionStorage.setItem("canvasID", canvasId);
+    }
+    removeCurrentCanvasRoom() {
+        sessionStorage.removeItem("canvasID");
+    }
+    getCurrentCanvasRoom() {
+        return sessionStorage.getItem("canvasID");
+    }
+    deregisterFromCanvas() {
+        this.ws.send(JSON.stringify(new AbstractEvent(WebSocketEvents.DeregisterForCanvas, new DeregisterFromCanvasEvent(this.getClientId(), this.getCurrentCanvasRoom()))));
     }
 }
 //# sourceMappingURL=WebSocketService.js.map

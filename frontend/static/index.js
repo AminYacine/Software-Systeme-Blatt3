@@ -1,3 +1,4 @@
+import { init } from "./init.js";
 import { WebSocketService } from "./WebSocketService.js";
 import { Overview } from "./overview.js";
 import { CanvasView } from "./canvasView.js";
@@ -40,8 +41,10 @@ export const router = async () => {
         console.log("isIdOk", isPathOk);
         if (isPathOk) {
             document.querySelector("#main-page").innerHTML = view.render();
+            init();
         }
         else {
+            wss.removeCurrentCanvasRoom();
             document.querySelector("#main-page").innerHTML = new NotFoundView().render();
         }
     }
@@ -49,14 +52,8 @@ export const router = async () => {
         document.querySelector("#main-page").innerHTML = view.render();
         wss.initOverviewUI();
         await wss.openConnection();
+        wss.deregisterFromCanvas();
     }
-    //fill div with html by calling render method of view class
-    // document.querySelector("#main-page").innerHTML = view.render();
-    // if (view instanceof CanvasView) {
-    //     init();
-    // } else if (view instanceof Overview) {
-    //     wss.initOverviewUI();
-    // }
     function checkCanvasPath() {
         const path = location.pathname;
         const id = path.substring(path.lastIndexOf('/') + 1);
@@ -74,5 +71,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
     router();
+});
+//to clear storage when window is closed
+window.addEventListener("load", () => {
+    console.log("onload");
 });
 //# sourceMappingURL=index.js.map

@@ -3,32 +3,28 @@ import {v4} from "uuid";
 import {CanvasEvent} from "./frontend/static/Event";
 
 export class CanvasRoom {
-    private static counter = 0;
     id: string;
-    private clients: WebSocket[] = [];
+    private clients: Map<number, WebSocket> = new Map();
     private shapesInCanvas: Map<string, CanvasEvent> = new Map();
 
 
     constructor(public name: string) {
-
         this.id = v4();
     }
 
-    addSession(session: WebSocket) {
-        this.clients.push(session);
+    addSession(id: number, session: WebSocket) {
+        this.clients.set(id, session);
     }
 
-    removeSession(session: WebSocket) {
-        this.clients = this.clients.filter((ws) => {
-            return ws !== session;
-        });
+    removeSession(clientId: number) {
+        this.clients.delete(clientId);
     }
 
     addEvent(id: string, canvasEvent: CanvasEvent) {
         this.shapesInCanvas.set(id, canvasEvent)
     }
 
-    removeShape(id: string) {
+    removeEvent(id: string) {
         this.shapesInCanvas.delete(id);
     }
 

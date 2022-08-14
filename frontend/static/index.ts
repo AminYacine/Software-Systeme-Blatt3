@@ -45,25 +45,17 @@ export const router = async () => {
         console.log("isIdOk", isPathOk);
         if (isPathOk) {
             document.querySelector("#main-page").innerHTML = view.render();
+            init();
         } else {
+            wss.removeCurrentCanvasRoom();
             document.querySelector("#main-page").innerHTML = new NotFoundView().render();
         }
     } else if (view instanceof Overview) {
         document.querySelector("#main-page").innerHTML = view.render();
         wss.initOverviewUI();
         await wss.openConnection();
+        wss.deregisterFromCanvas();
     }
-
-
-    //fill div with html by calling render method of view class
-    // document.querySelector("#main-page").innerHTML = view.render();
-
-
-    // if (view instanceof CanvasView) {
-    //     init();
-    // } else if (view instanceof Overview) {
-    //     wss.initOverviewUI();
-    // }
 
      function checkCanvasPath(): boolean {
         const path = location.pathname;
@@ -84,4 +76,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
     router();
+});
+//to clear storage when window is closed
+window.addEventListener("load", () => {
+    console.log("onload")
 });

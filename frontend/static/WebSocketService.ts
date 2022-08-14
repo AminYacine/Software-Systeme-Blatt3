@@ -6,16 +6,17 @@ import {CanvasRoom} from "./CanvasRoom.js";
 import {ConnectedEvent} from "./ConnectedEvent.js";
 import {CanvasCreatedEvent} from "../../ws-events/CanvasCreatedEvent.js";
 import {RegisterForCanvas} from "./RegisterForCanvas.js";
+import {CreateCanvasEvent} from "./CreateCanvasEvent.js";
+import {DeregisterFromCanvasEvent} from "./DeregisterFromCanvasEvent.js";
 
 export class WebSocketService {
     ws: WebSocket;
     openRooms: CanvasRoom [] = [];
-    clientId: number;
 
     constructor() {
     }
 
-   async openConnection() {
+    async openConnection() {
         this.ws = new WebSocket('ws://localhost:8080/web-socket');
 
         this.ws.onopen = (event) => {
@@ -40,13 +41,26 @@ export class WebSocketService {
                 case WebSocketEvents.RegisteredForCanvas: {
                     console.log("registered For canvas");
                     const registeredEvent: RegisteredForCanvasEvent = msg.value;
+                    this.setCurrentCanvasRoom(registeredEvent.canvasId);
                     window.history.pushState("", "", `/canvas/${registeredEvent.canvasId}`);
                     router();
                     break;
                 }
-                case WebSocketEvents.ClientId: {
+                case WebSocketEvents.CreatedClientId: {
                     const connectedEvent: ConnectedEvent = msg.value;
-                    this.clientId = connectedEvent.clientId;
+                    const currentClientID = this.getClientId();
+                    if (!currentClientID) {
+                        console.log("noch keine id");
+                        this.setClientId(connectedEvent.clientId);
+
+                    }
+                    this.ws.send(JSON.stringify(
+                        new AbstractEvent(
+                            WebSocketEvents.SessionID,
+                            this.getClientId()
+                        )
+                    ));
+
                     this.openRooms = connectedEvent.openRooms;
                     this.updateRoomListInHtml();
                     break;
@@ -72,30 +86,29 @@ export class WebSocketService {
     }
 
 
-    containsRoom(roomId: string):boolean {
+    containsRoom(roomId: string): boolean {
         console.log("in containsRoom")
-        const foundRoom =  this.openRooms.find(room =>  roomId === room.id);
+        const foundRoom = this.openRooms.find(room => roomId === room.id);
         return foundRoom !== undefined;
     }
 
-     waitForSocketConnection(): Promise<any> {
-       return new Promise(((resolve, reject) => {
-           const maxNumberOfAttempts = 10;
-           const intervalTimeInMs = 400;
+    waitForSocketConnection(): Promise<any> {
+        return new Promise(((resolve, reject) => {
+            const maxNumberOfAttempts = 10;
+            const intervalTimeInMs = 400;
 
-           let currentAttempt = 0;
-           const interval = setInterval(() => {
-               if (currentAttempt > maxNumberOfAttempts -1) {
-                   clearInterval(interval);
-                   reject("Maximum number of attempts exceeded");
-               }
-               else if (this.ws.readyState === WebSocket.OPEN) {
-                   clearInterval(interval);
-                   resolve("");
-               }
-               currentAttempt++;
-           }, intervalTimeInMs);
-       }));
+            let currentAttempt = 0;
+            const interval = setInterval(() => {
+                if (currentAttempt > maxNumberOfAttempts - 1) {
+                    clearInterval(interval);
+                    reject("Maximum number of attempts exceeded");
+                } else if (this.ws.readyState === WebSocket.OPEN) {
+                    clearInterval(interval);
+                    resolve("");
+                }
+                currentAttempt++;
+            }, intervalTimeInMs);
+        }));
     }
 
     private updateRoomListInHtml() {
@@ -121,7 +134,7 @@ export class WebSocketService {
         this.ws.send(JSON.stringify(
             new AbstractEvent(
                 WebSocketEvents.CreateCanvas,
-                canvasName
+                new CreateCanvasEvent(canvasName, this.getClientId())
             )
         ));
     }
@@ -130,7 +143,38 @@ export class WebSocketService {
         this.ws.send(JSON.stringify(
             new AbstractEvent(
                 WebSocketEvents.RegisterForCanvas,
-                new RegisterForCanvas(canvasId)
+                new RegisterForCanvas(this.getClientId(), canvasId)
+            )
+        ));
+    }
+
+    private getClientId(): number {
+       const clientId = sessionStorage.getItem("clientID");
+       return Number(clientId);
+    }
+
+    private setClientId(clientId: number) {
+        console.log("clientId set:", clientId);
+        sessionStorage.setItem("clientID", clientId.toString());
+    }
+
+    private setCurrentCanvasRoom(canvasId: string) {
+        sessionStorage.setItem("canvasID", canvasId);
+    }
+
+    removeCurrentCanvasRoom() {
+        sessionStorage.removeItem("canvasID");
+    }
+
+    private getCurrentCanvasRoom(): string {
+        return sessionStorage.getItem("canvasID");
+    }
+
+    deregisterFromCanvas() {
+        this.ws.send(JSON.stringify(
+            new AbstractEvent(
+                WebSocketEvents.DeregisterForCanvas,
+                new DeregisterFromCanvasEvent(this.getClientId(), this.getCurrentCanvasRoom())
             )
         ));
     }

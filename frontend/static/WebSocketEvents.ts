@@ -2,8 +2,9 @@ export enum WebSocketEvents {
     RegisterForCanvas = "RegisterForCanvas",
     RegisteredForCanvas = "RegisteredForCanvas",
     CanvasEvent = "CanvasEvent",
-    ClientId = "ClientId",
+    CreatedClientId = "CreatedClientId",
+    SessionID = "SessionID",
     CreateCanvas = "CreateCanvas",
     CanvasCreated = "CanvasCreated",
-    GetOpenRooms = "GetOpenRooms",
+    DeregisterForCanvas = "DeregisterForCanvas",
 }
