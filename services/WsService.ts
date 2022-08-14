@@ -1,5 +1,5 @@
 import * as WebSocket from "ws";
-import {AbstractEvent} from "../ws-events/AbstractEvent.js";
+import {AbstractEvent} from "../frontend/static/AbstractEvent.js";
 import {RegisteredForCanvasEvent} from "../frontend/static/RegisteredForCanvasEvent.js";
 import {CanvasCreatedEvent} from "../ws-events/CanvasCreatedEvent.js";
 import {WebSocketEvents} from "../frontend/static/WebSocketEvents.js";
@@ -7,7 +7,7 @@ import {RegisterForCanvas} from "../frontend/static/RegisterForCanvas.js";
 import {CanvasRoom} from "../CanvasRoom.js";
 import {ConnectedEvent} from "../ConnectedEvent.js";
 import {CreateCanvasEvent} from "../frontend/static/CreateCanvasEvent.js";
-import {DeregisterFromCanvasEvent} from "../frontend/static/DeregisterFromCanvasEvent";
+import {DeregisterFromCanvasEvent} from "../frontend/static/DeregisterFromCanvasEvent.js";
 
 export class WsService {
     private clientIdCounter = 1;
@@ -34,10 +34,10 @@ export class WsService {
                     canvas.addSession(clientId, client);
                     this.canvasRooms.set(canvas.id, canvas);
 
-                    client.send(JSON.stringify(new AbstractEvent(
+                    this.broadCastEvent( Array.from(this.clients.values()) ,new AbstractEvent(
                         WebSocketEvents.CanvasCreated,
-                        new CanvasCreatedEvent(canvas.id, canvasName)
-                    )));
+                        new CanvasCreatedEvent(canvas.id, canvasName, clientId)
+                    ));
                 }
                 break;
             }
@@ -95,8 +95,11 @@ export class WsService {
         )));
     }
 
-    removeClient(ws: WebSocket.WebSocket) {
-        //todo client needs permanent id
+
+    private broadCastEvent(clients: WebSocket[], event: AbstractEvent) {
+        clients.forEach(client => {
+            client.send(JSON.stringify( event));
+        });
     }
 
     private getNewClientID() {

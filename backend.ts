@@ -16,13 +16,9 @@ const wsService = new WsService();
 const appDir = path.resolve(__dirname, "frontend/")
 
 function run() {
-    //routes where to use static files
+
     app.use('/canvas',express.static(appDir));
     app.use('/',express.static(appDir));
-    // app.get("/*", ((req, res) => {
-    //     res.sendFile(path.resolve(__dirname, "frontend", "index.html"))
-    // }));
-
 
     app.get('*', function (req, res) {
         res.sendFile(path.resolve(appDir, "index.html"));

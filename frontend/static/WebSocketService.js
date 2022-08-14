@@ -24,8 +24,13 @@ export class WebSocketService {
                     const createdEvent = msg.value;
                     console.log("received canvas created", createdEvent);
                     this.openRooms.push(new CanvasRoom(createdEvent.name, createdEvent.id));
-                    window.history.pushState("", "", `/canvas/${createdEvent.id}`);
-                    router();
+                    if (createdEvent.clientId === this.getClientId()) {
+                        window.history.pushState("", "", `/canvas/${createdEvent.id}`);
+                        router();
+                    }
+                    else {
+                        this.updateRoomListInHtml();
+                    }
                     break;
                 }
                 case WebSocketEvents.RegisteredForCanvas: {
