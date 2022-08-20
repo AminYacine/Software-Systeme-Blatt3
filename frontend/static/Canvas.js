@@ -1,7 +1,8 @@
 import { MenuApi } from "./menuApi.js";
 import { CanvasEvent, EventTypes } from "./Event.js";
+import { sendCanvasEvent } from "./WebSocketService.js";
 export class Canvas {
-    constructor(creationCanvasDomElement, backgroundCanvasDomElement, toolArea, eventInput, wss) {
+    constructor(creationCanvasDomElement, backgroundCanvasDomElement, toolArea, eventInput) {
         this.eventInput = eventInput;
         //holds the current created shape with corresponding id
         this.creationShapes = new Map();
@@ -17,9 +18,6 @@ export class Canvas {
         this.standardOutlineColor = "black";
         this.backgroundCanvasDomElement = backgroundCanvasDomElement;
         this.creationCanvasDomElement = creationCanvasDomElement;
-        this.wsService = wss;
-        this.wsService.setCanvas(this);
-        console.log("canvas set", this);
         //sets the drawing context in the beginning to the creationCanvas because no shape has yet been drawn
         this.ctx = this.creationCanvasDomElement.getContext("2d");
         const { width, height } = this.creationCanvasDomElement.getBoundingClientRect();
@@ -300,7 +298,7 @@ export class Canvas {
     sendEvent(event) {
         console.log("New Event:", event.type, event.eventId, event.shape);
         this.eventStream.push(event.copy());
-        this.wsService.sendCanvasEvent(event);
+        sendCanvasEvent(event);
         this.handleEvent(event);
     }
     /**
@@ -309,6 +307,7 @@ export class Canvas {
      */
     handleEvent(event) {
         const eventShape = event.shape;
+        console.log("canvas got event", event);
         switch (event.type) {
             case EventTypes.ShapeRemoved: {
                 this.backGroundShapes.delete(event.shape.id);

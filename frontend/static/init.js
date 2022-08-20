@@ -1,7 +1,7 @@
 import { CircleFactory, LineFactory, RectangleFactory, SelectionFactory, TriangleFactory } from "./Shapes.js";
 import { ToolArea } from "./ToolArea.js";
 import { Canvas } from "./Canvas.js";
-export function init(wss) {
+export function init() {
     const creationCanvasDomElm = document.getElementById("creationArea");
     const backGroundCanvasDomElm = document.getElementById("backgroundArea");
     const menu = document.getElementsByClassName("tools");
@@ -44,7 +44,6 @@ export function init(wss) {
         new SelectionFactory(sm),
     ];
     const toolArea = new ToolArea(shapesSelector, menu[0]);
-    canvas = new Canvas(creationCanvasDomElm, backGroundCanvasDomElm, toolArea, texInput, wss);
-    console.log("canvas from init", canvas);
+    return canvas = new Canvas(creationCanvasDomElm, backGroundCanvasDomElm, toolArea, texInput);
 }
 //# sourceMappingURL=init.js.map

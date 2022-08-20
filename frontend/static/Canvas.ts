@@ -3,7 +3,7 @@ import {ToolArea} from "./ToolArea.js";
 import {MenuApi} from "./menuApi.js";
 import {Menu} from "./menu.js";
 import {CanvasEvent, EventTypes} from "./Event.js"
-import {WebSocketService} from "./WebSocketService.js";
+import {sendCanvasEvent} from "./WebSocketService.js";
 
 export class Canvas implements ShapeManager {
 
@@ -32,15 +32,12 @@ export class Canvas implements ShapeManager {
 
     private readonly standardFillColor: string = "transparent";
     private readonly standardOutlineColor: string = "black";
-    private readonly wsService: WebSocketService;
 
 
-    constructor(creationCanvasDomElement: HTMLCanvasElement, backgroundCanvasDomElement: HTMLCanvasElement, toolArea: ToolArea, private eventInput: HTMLInputElement, wss: WebSocketService) {
+    constructor(creationCanvasDomElement: HTMLCanvasElement, backgroundCanvasDomElement: HTMLCanvasElement, toolArea: ToolArea, private eventInput: HTMLInputElement) {
         this.backgroundCanvasDomElement = backgroundCanvasDomElement;
         this.creationCanvasDomElement = creationCanvasDomElement;
-        this.wsService = wss;
-        this.wsService.setCanvas(this);
-        console.log("canvas set", this);
+
         //sets the drawing context in the beginning to the creationCanvas because no shape has yet been drawn
         this.ctx = this.creationCanvasDomElement.getContext("2d");
 
@@ -383,7 +380,7 @@ export class Canvas implements ShapeManager {
     sendEvent(event: CanvasEvent) {
         console.log("New Event:", event.type, event.eventId, event.shape);
         this.eventStream.push(event.copy());
-        this.wsService.sendCanvasEvent(event);
+        sendCanvasEvent(event);
         this.handleEvent(event);
     }
 
@@ -393,6 +390,7 @@ export class Canvas implements ShapeManager {
      */
      handleEvent(event: CanvasEvent) {
         const eventShape = event.shape;
+        console.log("canvas got event", event)
         switch (event.type) {
 
             case EventTypes.ShapeRemoved: {

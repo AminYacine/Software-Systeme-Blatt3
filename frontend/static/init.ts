@@ -2,8 +2,7 @@ import {Shape, ShapeFactory, ShapeManager} from "./types.js";
 import {CircleFactory, LineFactory, RectangleFactory, SelectionFactory, TriangleFactory} from "./Shapes.js";
 import {ToolArea} from "./ToolArea.js";
 import {Canvas} from "./Canvas.js";
-import {WebSocketService} from "./WebSocketService";
-export function init(wss: WebSocketService): Canvas {
+export function init(): Canvas {
     const creationCanvasDomElm = document.getElementById("creationArea") as HTMLCanvasElement;
     const backGroundCanvasDomElm = document.getElementById("backgroundArea") as HTMLCanvasElement;
     const menu = document.getElementsByClassName("tools");
@@ -47,6 +46,6 @@ export function init(wss: WebSocketService): Canvas {
         new SelectionFactory(sm),
     ];
     const toolArea = new ToolArea(shapesSelector, menu[0]);
-   return  canvas = new Canvas(creationCanvasDomElm, backGroundCanvasDomElm, toolArea, texInput, wss);
+   return  canvas = new Canvas(creationCanvasDomElm, backGroundCanvasDomElm, toolArea, texInput);
 
 }

@@ -11,202 +11,200 @@ import {DeregisterFromCanvasEvent} from "./DeregisterFromCanvasEvent.js";
 import {CanvasEvent} from "./Event.js";
 import {RoomEvent} from "./RoomEvent.js";
 import {Canvas} from "./Canvas.js";
+import {init} from "./init.js";
 
-export class WebSocketService {
-    ws: WebSocket;
-    openRooms: CanvasRoom [] = [];
-    canvas: Canvas | undefined = undefined;
+let ws: WebSocket;
+let openRooms: CanvasRoom [] = [];
+let canvas: Canvas;
 
-    async openConnection() {
-        this.ws = new WebSocket('ws://localhost:8080/web-socket');
+export async function openConnection() {
+    ws = new WebSocket('ws://localhost:8080/web-socket');
 
-        this.ws.onopen = (event) => {
-            console.log("Open", event.type);
-        }
-        this.ws.onclose = (event) => {
-            console.log("Close", event);
-        }
-
-        this.ws.onmessage = (message) => {
-            let msg: AbstractEvent = JSON.parse(message.data)
-
-            switch (msg.type) {
-                case WebSocketEvents.CanvasCreated: {
-                    const createdEvent: CanvasCreatedEvent = msg.value;
-                    console.log("received canvas created", createdEvent);
-                    this.openRooms.push(new CanvasRoom(createdEvent.name, createdEvent.id));
-                    if (createdEvent.clientId === this.getClientId()) {
-                        window.history.pushState("", "", `/canvas/${createdEvent.id}`);
-                        router();
-                    } else {
-                        this.updateRoomListInHtml();
-                    }
-                    break;
-                }
-                case WebSocketEvents.RegisteredForCanvas: {
-                    console.log("registered For canvas");
-                    const registeredEvent: RegisteredForCanvasEvent = msg.value;
-                    console.log(registeredEvent.canvasId);
-                    this.setCurrentCanvasRoom(registeredEvent.canvasId);
-                    window.history.pushState("", "", `/canvas/${registeredEvent.canvasId}`);
-                    router();
-                    break;
-                }
-                case WebSocketEvents.CreatedClientId: {
-                    const connectedEvent: ConnectedEvent = msg.value;
-                    const currentClientID = this.getClientId();
-                    if (!currentClientID) {
-                        console.log("noch keine id");
-                        this.setClientId(connectedEvent.clientId);
-
-                    }
-                    this.ws.send(JSON.stringify(
-                        new AbstractEvent(
-                            WebSocketEvents.SessionID,
-                            this.getClientId()
-                        )
-                    ));
-
-                    this.openRooms = connectedEvent.openRooms;
-                    this.updateRoomListInHtml();
-                    break;
-                }
-                case WebSocketEvents.CanvasChangedEvent: {
-                    const roomEvent: RoomEvent = msg.value;
-                    if (this.canvas) {
-                        this.canvas.handleEvent(roomEvent.canvasEvent);
-                    }else {
-                        console.log("canvas is null oder undefined", this.canvas)
-                    }
-                    break;
-                }
-                default : {
-                    console.log("message", message.data);
-                }
-            }
-        }
-        await this.waitForSocketConnection();
+    ws.onopen = (event) => {
+        console.log("Open", event.type);
+    }
+    ws.onclose = (event) => {
+        console.log("Close", event);
     }
 
-    initOverviewUI() {
-        const name = document.getElementById("roomName") as HTMLInputElement;
-        const button = document.getElementById("newRoomButton");
+    ws.onmessage = (message) => {
+        let msg: AbstractEvent = JSON.parse(message.data)
 
-        button.addEventListener("click", (ev) => {
-            if (name.value) {
-                console.log("input valid");
-                this.sendCreateCanvasEvent(name.value);
+        switch (msg.type) {
+            case WebSocketEvents.CanvasCreated: {
+                const createdEvent: CanvasCreatedEvent = msg.value;
+                console.log("received canvas created", createdEvent);
+                openRooms.push(new CanvasRoom(createdEvent.name, createdEvent.id));
+                if (createdEvent.clientId === getClientId()) {
+                    window.history.pushState("", "", `/canvas/${createdEvent.id}`);
+                    router();
+                } else {
+                    updateRoomListInHtml();
+                }
+                break;
             }
+            case WebSocketEvents.RegisteredForCanvas: {
+                console.log("registered For canvas");
+                const registeredEvent: RegisteredForCanvasEvent = msg.value;
+                console.log(registeredEvent.canvasId);
+                setCurrentCanvasRoom(registeredEvent.canvasId);
+                window.history.pushState("", "", `/canvas/${registeredEvent.canvasId}`);
+                router();
+                break;
+            }
+            case WebSocketEvents.CreatedClientId: {
+                const connectedEvent: ConnectedEvent = msg.value;
+                const currentClientID = getClientId();
+                if (!currentClientID) {
+                    console.log("noch keine id");
+                    setClientId(connectedEvent.clientId);
+
+                }
+                ws.send(JSON.stringify(
+                    new AbstractEvent(
+                        WebSocketEvents.SessionID,
+                        getClientId()
+                    )
+                ));
+
+                openRooms = connectedEvent.openRooms;
+                updateRoomListInHtml();
+                break;
+            }
+            case WebSocketEvents.CanvasChangedEvent: {
+                const roomEvent: RoomEvent = msg.value;
+                if (canvas) {
+                    canvas.handleEvent(roomEvent.canvasEvent);
+                } else {
+                    console.log("canvas is null oder undefined", canvas)
+                }
+                break;
+            }
+            default : {
+                console.log("message", message.data);
+            }
+        }
+    }
+    await waitForSocketConnection();
+}
+
+export function initCanvasView() {
+    canvas = init();
+}
+
+export function initOverviewUI() {
+    const name = document.getElementById("roomName") as HTMLInputElement;
+    const button = document.getElementById("newRoomButton");
+
+    button.addEventListener("click", (ev) => {
+        if (name.value) {
+            console.log("input valid");
+            sendCreateCanvasEvent(name.value);
+        }
+    });
+}
+
+
+export function containsRoom(roomId: string): boolean {
+    console.log("in containsRoom")
+    const foundRoom = openRooms.find(room => roomId === room.id);
+    return foundRoom !== undefined;
+}
+
+function waitForSocketConnection(): Promise<any> {
+    return new Promise(((resolve, reject) => {
+        const maxNumberOfAttempts = 10;
+        const intervalTimeInMs = 400;
+
+        let currentAttempt = 0;
+        const interval = setInterval(() => {
+            if (currentAttempt > maxNumberOfAttempts - 1) {
+                clearInterval(interval);
+                reject("Maximum number of attempts exceeded");
+            } else if (ws.readyState === WebSocket.OPEN) {
+                clearInterval(interval);
+                resolve("");
+            }
+            currentAttempt++;
+        }, intervalTimeInMs);
+    }));
+}
+
+function updateRoomListInHtml() {
+    //only needs to be rendered if current page is overview
+    if (window.location.pathname === '/') {
+        const list: HTMLUListElement = document.getElementById("rooms") as HTMLUListElement;
+        //remove every list item to fill with current ones
+        while (list.firstChild) {
+            list.removeChild(list.firstChild);
+        }
+
+        openRooms.forEach(room => {
+            const listElem = document.createElement("li");
+            listElem.innerHTML = `${room.name} (${room.id})`;
+            listElem.setAttribute("class", "clickable");
+            listElem.addEventListener("click", () => sendRegisterForCanvas(room.id));
+            list.appendChild(listElem);
         });
     }
+}
 
+function sendCreateCanvasEvent(canvasName: string) {
+    ws.send(JSON.stringify(
+        new AbstractEvent(
+            WebSocketEvents.CreateCanvas,
+            new CreateCanvasEvent(canvasName, getClientId())
+        )
+    ));
+}
 
-    containsRoom(roomId: string): boolean {
-        console.log("in containsRoom")
-        const foundRoom = this.openRooms.find(room => roomId === room.id);
-        return foundRoom !== undefined;
-    }
+function sendRegisterForCanvas(canvasId: string) {
+    ws.send(JSON.stringify(
+        new AbstractEvent(
+            WebSocketEvents.RegisterForCanvas,
+            new RegisterForCanvas(getClientId(), canvasId)
+        )
+    ));
+}
 
-    waitForSocketConnection(): Promise<any> {
-        return new Promise(((resolve, reject) => {
-            const maxNumberOfAttempts = 10;
-            const intervalTimeInMs = 400;
+function getClientId(): number {
+    const clientId = sessionStorage.getItem("clientID");
+    return Number(clientId);
+}
 
-            let currentAttempt = 0;
-            const interval = setInterval(() => {
-                if (currentAttempt > maxNumberOfAttempts - 1) {
-                    clearInterval(interval);
-                    reject("Maximum number of attempts exceeded");
-                } else if (this.ws.readyState === WebSocket.OPEN) {
-                    clearInterval(interval);
-                    resolve("");
-                }
-                currentAttempt++;
-            }, intervalTimeInMs);
-        }));
-    }
+function setClientId(clientId: number) {
+    console.log("clientId set:", clientId);
+    sessionStorage.setItem("clientID", clientId.toString());
+}
 
-    private updateRoomListInHtml() {
-        //only needs to be rendered if current page is overview
-        if (window.location.pathname === '/') {
-            const list: HTMLUListElement = document.getElementById("rooms") as HTMLUListElement;
-            //remove every list item to fill with current ones
-            while (list.firstChild) {
-                list.removeChild(list.firstChild);
-            }
+function setCurrentCanvasRoom(canvasId: string) {
+    sessionStorage.setItem("canvasID", canvasId);
+}
 
-            this.openRooms.forEach(room => {
-                const listElem = document.createElement("li");
-                listElem.innerHTML = `${room.name} (${room.id})`;
-                listElem.setAttribute("class", "clickable");
-                listElem.addEventListener("click", () => this.sendRegisterForCanvas(room.id));
-                list.appendChild(listElem);
-            });
-        }
-    }
+export function removeCurrentCanvasRoom() {
+    sessionStorage.removeItem("canvasID");
+}
 
-    private sendCreateCanvasEvent(canvasName: string) {
-        this.ws.send(JSON.stringify(
-            new AbstractEvent(
-                WebSocketEvents.CreateCanvas,
-                new CreateCanvasEvent(canvasName, this.getClientId())
-            )
-        ));
-    }
+function getCurrentCanvasRoom(): string {
+    return sessionStorage.getItem("canvasID");
+}
 
-    private sendRegisterForCanvas(canvasId: string) {
-        this.ws.send(JSON.stringify(
-            new AbstractEvent(
-                WebSocketEvents.RegisterForCanvas,
-                new RegisterForCanvas(this.getClientId(), canvasId)
-            )
-        ));
-    }
+export function deregisterFromCanvas() {
+    ws.send(JSON.stringify(
+        new AbstractEvent(
+            WebSocketEvents.DeregisterForCanvas,
+            new DeregisterFromCanvasEvent(getClientId(), getCurrentCanvasRoom())
+        )
+    ));
+}
 
-    private getClientId(): number {
-        const clientId = sessionStorage.getItem("clientID");
-        return Number(clientId);
-    }
-
-    private setClientId(clientId: number) {
-        console.log("clientId set:", clientId);
-        sessionStorage.setItem("clientID", clientId.toString());
-    }
-
-    private setCurrentCanvasRoom(canvasId: string) {
-        sessionStorage.setItem("canvasID", canvasId);
-    }
-
-    removeCurrentCanvasRoom() {
-        sessionStorage.removeItem("canvasID");
-    }
-
-    private getCurrentCanvasRoom(): string {
-        return sessionStorage.getItem("canvasID");
-    }
-
-    deregisterFromCanvas() {
-        this.ws.send(JSON.stringify(
-            new AbstractEvent(
-                WebSocketEvents.DeregisterForCanvas,
-                new DeregisterFromCanvasEvent(this.getClientId(), this.getCurrentCanvasRoom())
-            )
-        ));
-    }
-
-    sendCanvasEvent(event: CanvasEvent) {
-        console.log("sent Event to backend ");
-        console.log("current room id", this.getCurrentCanvasRoom())
-        this.ws.send(JSON.stringify(
-            new AbstractEvent(
-                WebSocketEvents.CanvasEvent,
-                new RoomEvent(this.getClientId(), this.getCurrentCanvasRoom(), event)
-            )
-        ));
-    }
-
-    setCanvas(canvas: Canvas) {
-        this.canvas = canvas;
-        console.log("new canvas", this.canvas)
-    }
+export function sendCanvasEvent(event: CanvasEvent) {
+    console.log("sent Event to backend ");
+    console.log("current room id", getCurrentCanvasRoom())
+    ws.send(JSON.stringify(
+        new AbstractEvent(
+            WebSocketEvents.CanvasEvent,
+            new RoomEvent(getClientId(), getCurrentCanvasRoom(), event)
+        )
+    ));
 }

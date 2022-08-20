@@ -1,5 +1,4 @@
-import { init } from "./init.js";
-import { WebSocketService } from "./WebSocketService.js";
+import * as wss from "./WebSocketService.js";
 import { Overview } from "./overview.js";
 import { CanvasView } from "./canvasView.js";
 import { NotFoundView } from "./notFoundView.js";
@@ -33,15 +32,13 @@ export const router = async () => {
     });
     let match = potentialMatches.find((potentialMatch) => potentialMatch.isMatch);
     const view = new match.route.view();
-    //establish socket connection
-    const wss = new WebSocketService();
     if (view instanceof CanvasView) {
         await wss.openConnection();
         const isPathOk = checkCanvasPath();
         console.log("isIdOk", isPathOk);
         if (isPathOk) {
             document.querySelector("#main-page").innerHTML = view.render();
-            init(wss);
+            wss.initCanvasView();
         }
         else {
             wss.removeCurrentCanvasRoom();
