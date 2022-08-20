@@ -1,4 +1,3 @@
-import {init} from "./init.js";
 import * as wss from "./WebSocketService.js";
 import {Overview} from "./overview.js";
 import {CanvasView} from "./canvasView.js";

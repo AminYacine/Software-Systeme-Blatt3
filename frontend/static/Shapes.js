@@ -192,7 +192,7 @@ export class LineFactory extends AbstractFactory {
     handleMouseClick(x, y, e) {
     }
 }
-class Circle extends AbstractShape {
+export class Circle extends AbstractShape {
     constructor(center, radius, specificId) {
         super(specificId);
         this.center = center;
@@ -244,7 +244,7 @@ export class CircleFactory extends AbstractFactory {
     handleMouseClick(x, y, e) {
     }
 }
-class Rectangle extends AbstractShape {
+export class Rectangle extends AbstractShape {
     constructor(from, to, specificId) {
         super(specificId);
         this.from = from;
@@ -317,7 +317,7 @@ export class RectangleFactory extends AbstractFactory {
     handleMouseClick(x, y, e) {
     }
 }
-class Triangle extends AbstractShape {
+export class Triangle extends AbstractShape {
     constructor(p1, p2, p3, specificId) {
         super(specificId);
         this.p1 = p1;

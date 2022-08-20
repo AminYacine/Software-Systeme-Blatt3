@@ -1,6 +1,7 @@
 import { MenuApi } from "./menuApi.js";
 import { CanvasEvent, EventTypes } from "./Event.js";
 import { sendCanvasEvent } from "./WebSocketService.js";
+import { Circle, Line, Rectangle, Triangle } from "./Shapes.js";
 export class Canvas {
     constructor(creationCanvasDomElement, backgroundCanvasDomElement, toolArea, eventInput) {
         this.eventInput = eventInput;
@@ -105,7 +106,7 @@ export class Canvas {
             }
             this.creationShapes.clear();
             this.drawCreationCanvas();
-            this.sendEvent(new CanvasEvent(EventTypes.ShapeAdded, shape));
+            this.sendEvent(new CanvasEvent(EventTypes.ShapeAdded, Canvas.getShapeType(shape), shape));
         }
         // if the shape is not yet finished, it will be added to the creationShapes and the creationCanvas will be redrawn
         else {
@@ -160,18 +161,18 @@ export class Canvas {
             if (this.shapesOnClickedPoint.length - 1 > index) {
                 //only send unselect if a shape is selected
                 if (this.selectedShapes[0]) {
-                    this.sendEvent(new CanvasEvent(EventTypes.ShapeUnselected, this.selectedShapes[0]));
+                    this.sendEvent(new CanvasEvent(EventTypes.ShapeUnselected, Canvas.getShapeType(this.selectedShapes[0]), this.selectedShapes[0]));
                 }
-                this.sendEvent(new CanvasEvent(EventTypes.ShapeSelected, this.shapesOnClickedPoint[index + 1]));
+                this.sendEvent(new CanvasEvent(EventTypes.ShapeSelected, Canvas.getShapeType(this.shapesOnClickedPoint[index + 1]), this.shapesOnClickedPoint[index + 1]));
             }
             else {
                 //only handle selection if the selected shape and the shapeOnClick are different
                 if (this.selectedShapes[0] !== this.shapesOnClickedPoint[0]) {
                     //only send unselect if a shape is selected
                     if (this.selectedShapes[0]) {
-                        this.sendEvent(new CanvasEvent(EventTypes.ShapeUnselected, this.selectedShapes[0]));
+                        this.sendEvent(new CanvasEvent(EventTypes.ShapeUnselected, Canvas.getShapeType(this.selectedShapes[0]), this.selectedShapes[0]));
                     }
-                    this.sendEvent(new CanvasEvent(EventTypes.ShapeSelected, this.shapesOnClickedPoint[0]));
+                    this.sendEvent(new CanvasEvent(EventTypes.ShapeSelected, Canvas.getShapeType(this.shapesOnClickedPoint[0]), this.shapesOnClickedPoint[0]));
                 }
             }
         }
@@ -182,10 +183,10 @@ export class Canvas {
      */
     selectShape() {
         this.selectedShapes.forEach(shape => {
-            this.sendEvent(new CanvasEvent(EventTypes.ShapeUnselected, shape));
+            this.sendEvent(new CanvasEvent(EventTypes.ShapeUnselected, Canvas.getShapeType(shape), shape));
         });
         if (this.shapesOnClickedPoint.length > 0) {
-            this.sendEvent(new CanvasEvent(EventTypes.ShapeSelected, this.shapesOnClickedPoint[0]));
+            this.sendEvent(new CanvasEvent(EventTypes.ShapeSelected, Canvas.getShapeType(this.shapesOnClickedPoint[0]), this.shapesOnClickedPoint[0]));
         }
     }
     /**
@@ -195,7 +196,7 @@ export class Canvas {
     selectShapes() {
         if (this.shapesOnClickedPoint.length > 0) {
             if (!this.selectedShapes.includes(this.shapesOnClickedPoint[0])) {
-                this.sendEvent(new CanvasEvent(EventTypes.ShapeSelected, this.shapesOnClickedPoint[0]));
+                this.sendEvent(new CanvasEvent(EventTypes.ShapeSelected, Canvas.getShapeType(this.shapesOnClickedPoint[0]), this.shapesOnClickedPoint[0]));
             }
         }
     }
@@ -218,7 +219,7 @@ export class Canvas {
         let deleteItem = MenuApi.createItem("Delete", () => {
             this.selectedShapes.forEach((shape) => {
                 //todo add own clientId;
-                this.sendEvent(new CanvasEvent(EventTypes.ShapeRemoved, shape));
+                this.sendEvent(new CanvasEvent(EventTypes.ShapeRemoved, Canvas.getShapeType(shape), shape));
             });
         });
         const moveForeGroundItem = MenuApi.createItem("To Foreground", () => {
@@ -258,14 +259,14 @@ export class Canvas {
         const shapeToMove = this.selectedShapes[0];
         const idToMove = shapeToMove.id;
         // selected shape is deleted from the map so the position can be changed
-        this.sendEvent(new CanvasEvent(EventTypes.ShapeRemoved, shapeToMove));
+        this.sendEvent(new CanvasEvent(EventTypes.ShapeRemoved, Canvas.getShapeType(shapeToMove), shapeToMove));
         if (toForeGround) {
             //add event moveToForeground
-            this.sendEvent(new CanvasEvent(EventTypes.ShapeAdded, shapeToMove));
+            this.sendEvent(new CanvasEvent(EventTypes.ShapeAdded, Canvas.getShapeType(shapeToMove), shapeToMove));
         }
         else {
             //add event moveToBackground
-            this.sendEvent(new CanvasEvent(EventTypes.MovedToBackground, shapeToMove));
+            this.sendEvent(new CanvasEvent(EventTypes.MovedToBackground, Canvas.getShapeType(shapeToMove), shapeToMove));
         }
     }
     /**
@@ -306,7 +307,7 @@ export class Canvas {
      * @param event received CanvasEvent
      */
     handleEvent(event) {
-        const eventShape = event.shape;
+        const eventShape = this.getSpecificShape(event);
         console.log("canvas got event", event);
         switch (event.type) {
             case EventTypes.ShapeRemoved: {
@@ -316,6 +317,7 @@ export class Canvas {
             }
             case EventTypes.ShapeAdded: {
                 this.backGroundShapes.set(eventShape.id, eventShape);
+                console.log(this.backGroundShapes);
                 break;
             }
             case EventTypes.MovedToBackground: {
@@ -336,6 +338,40 @@ export class Canvas {
             }
         }
         this.drawBackground();
+    }
+    getSpecificShape(event) {
+        switch (event.shapeType) {
+            case "Line": {
+                const line = JSON.parse(JSON.stringify(event.shape));
+                return new Line(line.from, line.to, line.id);
+            }
+            case "Rectangle": {
+                const rec = JSON.parse(JSON.stringify(event.shape));
+                return new Rectangle(rec.from, rec.to, rec.id);
+            }
+            case "Circle": {
+                const circle = JSON.parse(JSON.stringify(event.shape));
+                return new Circle(circle.center, circle.radius, circle.id);
+            }
+            case "Triangle": {
+                const triangle = JSON.parse(JSON.stringify(event.shape));
+                return new Triangle(triangle.p1, triangle.p2, triangle.p3, triangle.id);
+            }
+        }
+    }
+    static getShapeType(shape) {
+        if (shape instanceof Line) {
+            return "Line";
+        }
+        else if (shape instanceof Rectangle) {
+            return "Rectangle";
+        }
+        else if (shape instanceof Circle) {
+            return "Circle";
+        }
+        else if (shape instanceof Triangle) {
+            return "Triangle";
+        }
     }
 }
 //# sourceMappingURL=Canvas.js.map

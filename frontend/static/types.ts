@@ -23,6 +23,7 @@ export interface Shape {
     setOutlineColor(color: string);
 
     copyShape(positionMovement?: Point2D): Shape;
+
 }
 
 export interface ShapeManager {

@@ -1,15 +1,18 @@
 import {Shape} from "./types.js";
 
+
 export class CanvasEvent {
     type: EventTypes;
+    shapeType: string;
     shape: Shape;
     // user: number;
     eventId: number;
     private static counter: number = 0;
     color?: string;
 
-    constructor(type: EventTypes, shape: Shape, color?: string) {
+    constructor(type: EventTypes, shapeType: string, shape: Shape, color?: string) {
         this.type = type;
+        this.shapeType = shapeType;
         this.shape = shape;
         // this.user = user;
         this.eventId = CanvasEvent.counter++;
@@ -17,7 +20,7 @@ export class CanvasEvent {
     }
 
     copy(): CanvasEvent {
-       const copyEvent = new CanvasEvent( this.type , this.shape.copyShape(), this.color);
+       const copyEvent = new CanvasEvent( this.type, this.shapeType, this.shape.copyShape(), this.color);
        copyEvent.eventId --;
        return copyEvent;
     }

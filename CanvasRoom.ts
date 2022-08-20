@@ -2,6 +2,7 @@ import * as WebSocket from "ws";
 import {v4} from "uuid";
 import {CanvasEvent, EventTypes} from "./frontend/static/Event.js";
 import {Shape} from "./frontend/static/types.js";
+import {Circle, Line, Rectangle, Triangle} from "./frontend/static/Shapes.js";
 
 export class CanvasRoom {
     id: string;
@@ -35,7 +36,7 @@ export class CanvasRoom {
     getCurrentEvents(): CanvasEvent[] {
         const eventArray: CanvasEvent[] = [];
         this.shapesInCanvas.forEach((shape, id) => {
-            eventArray.push(new CanvasEvent(EventTypes.ShapeAdded, shape));
+            eventArray.push(new CanvasEvent(EventTypes.ShapeAdded, this.getShapeType(shape),shape));
         });
         return eventArray;
     }
@@ -66,14 +67,23 @@ export class CanvasRoom {
     getClientsExcept(clientId: number): WebSocket[] {
         let filteredClients: WebSocket[] = [];
         this.clients.forEach((websocket, id) => {
-            console.log("client initiator", clientId)
 
             if (id !== clientId) {
                 filteredClients.push(websocket);
-                console.log("clientreceiver:", id);
             }
         });
-        console.log("filtered clients:", filteredClients);
         return filteredClients;
+    }
+
+    private getShapeType(shape) {
+        if (shape instanceof Line) {
+            return "Line";
+        } else if (shape instanceof Rectangle) {
+            return "Rectangle";
+        } else if (shape instanceof Circle) {
+            return "Circle";
+        } else if (shape instanceof Triangle){
+            return "Triangle";
+        }
     }
 }

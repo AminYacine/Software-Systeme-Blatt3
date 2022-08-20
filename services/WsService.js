@@ -72,7 +72,7 @@ export class WsService {
                 const room = this.canvasRooms.get(roomId);
                 console.log("all room ids", this.canvasRooms.keys());
                 console.log("event room id:", roomId);
-                console.log("canvas event");
+                console.log("canvas event", canvasEvent);
                 if (room !== undefined) {
                     console.log("room found");
                     room.addEvent(canvasEvent.eventId, canvasEvent);

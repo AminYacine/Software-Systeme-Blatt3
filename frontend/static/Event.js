@@ -1,13 +1,14 @@
 export class CanvasEvent {
-    constructor(type, shape, color) {
+    constructor(type, shapeType, shape, color) {
         this.type = type;
+        this.shapeType = shapeType;
         this.shape = shape;
         // this.user = user;
         this.eventId = CanvasEvent.counter++;
         this.color = color;
     }
     copy() {
-        const copyEvent = new CanvasEvent(this.type, this.shape.copyShape(), this.color);
+        const copyEvent = new CanvasEvent(this.type, this.shapeType, this.shape.copyShape(), this.color);
         copyEvent.eventId--;
         return copyEvent;
     }

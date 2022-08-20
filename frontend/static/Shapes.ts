@@ -247,7 +247,7 @@ export class LineFactory extends AbstractFactory<Line> implements ShapeFactory {
 }
 
 
-class Circle extends AbstractShape implements Shape {
+export class Circle extends AbstractShape implements Shape {
     constructor(readonly center: Point2D, readonly radius: number, specificId?: number) {
         super(specificId);
     }
@@ -315,7 +315,7 @@ export class CircleFactory extends AbstractFactory<Circle> implements ShapeFacto
 }
 
 
-class Rectangle extends AbstractShape implements Shape {
+export class Rectangle extends AbstractShape implements Shape {
     constructor(readonly from: Point2D, readonly to: Point2D, specificId?: number) {
         super(specificId);
     }
@@ -402,8 +402,7 @@ export class RectangleFactory extends AbstractFactory<Rectangle> implements Shap
 }
 
 
-class Triangle extends AbstractShape implements Shape {
-
+export class Triangle extends AbstractShape implements Shape {
     constructor(readonly p1: Point2D, readonly p2: Point2D, readonly p3: Point2D, specificId?: number) {
         super(specificId);
     }
