@@ -7,4 +7,5 @@ export enum WebSocketEvents {
     CreateCanvas = "CreateCanvas",
     CanvasCreated = "CanvasCreated",
     DeregisterForCanvas = "DeregisterForCanvas",
+    CanvasChangedEvent = "CanvasChangedEvent",
 }

@@ -1,8 +1,9 @@
 import {Shape, ShapeManager} from "./types.js";
 import {ToolArea} from "./ToolArea.js";
 import {MenuApi} from "./menuApi.js";
-import {Menu} from "./menu";
+import {Menu} from "./menu.js";
 import {CanvasEvent, EventTypes} from "./Event.js"
+import {WebSocketService} from "./WebSocketService.js";
 
 export class Canvas implements ShapeManager {
 
@@ -31,12 +32,15 @@ export class Canvas implements ShapeManager {
 
     private readonly standardFillColor: string = "transparent";
     private readonly standardOutlineColor: string = "black";
+    private readonly wsService: WebSocketService;
 
 
-    constructor(creationCanvasDomElement: HTMLCanvasElement, backgroundCanvasDomElement: HTMLCanvasElement, toolArea: ToolArea, private eventInput: HTMLInputElement) {
+    constructor(creationCanvasDomElement: HTMLCanvasElement, backgroundCanvasDomElement: HTMLCanvasElement, toolArea: ToolArea, private eventInput: HTMLInputElement, wss: WebSocketService) {
         this.backgroundCanvasDomElement = backgroundCanvasDomElement;
         this.creationCanvasDomElement = creationCanvasDomElement;
-
+        this.wsService = wss;
+        this.wsService.setCanvas(this);
+        console.log("canvas set", this);
         //sets the drawing context in the beginning to the creationCanvas because no shape has yet been drawn
         this.ctx = this.creationCanvasDomElement.getContext("2d");
 
@@ -93,7 +97,7 @@ export class Canvas implements ShapeManager {
 
     handleNewEvent(eventId: string) {
         const myEvent = this.eventStream.find(event => {
-            return event.getId() === Number(eventId)
+            return event.eventId === Number(eventId)
         });
         console.log("Found event:", myEvent)
         this.sendEvent(myEvent);
@@ -148,7 +152,7 @@ export class Canvas implements ShapeManager {
 
             this.creationShapes.clear();
             this.drawCreationCanvas();
-            this.sendEvent(new CanvasEvent(EventTypes.ShapeAdded, shape, 1));
+            this.sendEvent(new CanvasEvent(EventTypes.ShapeAdded, shape));
         }
         // if the shape is not yet finished, it will be added to the creationShapes and the creationCanvas will be redrawn
         else {
@@ -210,17 +214,17 @@ export class Canvas implements ShapeManager {
             if (this.shapesOnClickedPoint.length - 1 > index) {
                 //only send unselect if a shape is selected
                 if (this.selectedShapes[0]) {
-                    this.sendEvent(new CanvasEvent(EventTypes.ShapeUnselected, this.selectedShapes[0], 1));
+                    this.sendEvent(new CanvasEvent(EventTypes.ShapeUnselected, this.selectedShapes[0]));
                 }
-                this.sendEvent(new CanvasEvent(EventTypes.ShapeSelected, this.shapesOnClickedPoint[index + 1], 1));
+                this.sendEvent(new CanvasEvent(EventTypes.ShapeSelected, this.shapesOnClickedPoint[index + 1]));
             } else {
                 //only handle selection if the selected shape and the shapeOnClick are different
                 if (this.selectedShapes[0] !== this.shapesOnClickedPoint[0]) {
                     //only send unselect if a shape is selected
                     if (this.selectedShapes[0]) {
-                        this.sendEvent(new CanvasEvent(EventTypes.ShapeUnselected, this.selectedShapes[0], 1));
+                        this.sendEvent(new CanvasEvent(EventTypes.ShapeUnselected, this.selectedShapes[0]));
                     }
-                    this.sendEvent(new CanvasEvent(EventTypes.ShapeSelected, this.shapesOnClickedPoint[0], 1));
+                    this.sendEvent(new CanvasEvent(EventTypes.ShapeSelected, this.shapesOnClickedPoint[0]));
                 }
             }
         }
@@ -232,10 +236,10 @@ export class Canvas implements ShapeManager {
      */
     selectShape() {
         this.selectedShapes.forEach(shape => {
-            this.sendEvent(new CanvasEvent(EventTypes.ShapeUnselected, shape, 1));
+            this.sendEvent(new CanvasEvent(EventTypes.ShapeUnselected, shape));
         });
         if (this.shapesOnClickedPoint.length > 0) {
-            this.sendEvent(new CanvasEvent(EventTypes.ShapeSelected, this.shapesOnClickedPoint[0], 1));
+            this.sendEvent(new CanvasEvent(EventTypes.ShapeSelected, this.shapesOnClickedPoint[0]));
         }
     }
 
@@ -245,9 +249,8 @@ export class Canvas implements ShapeManager {
      */
     selectShapes() {
         if (this.shapesOnClickedPoint.length > 0) {
-            // this.selectedShapes.push(this.shapesOnClickedPoint[0]);
             if (!this.selectedShapes.includes(this.shapesOnClickedPoint[0])) {
-                this.sendEvent(new CanvasEvent(EventTypes.ShapeSelected, this.shapesOnClickedPoint[0], 1));
+                this.sendEvent(new CanvasEvent(EventTypes.ShapeSelected, this.shapesOnClickedPoint[0]));
             }
         }
     }
@@ -274,7 +277,7 @@ export class Canvas implements ShapeManager {
         let deleteItem = MenuApi.createItem("Delete", () => {
             this.selectedShapes.forEach((shape) => {
                 //todo add own clientId;
-                this.sendEvent(new CanvasEvent(EventTypes.ShapeRemoved, shape, 1));
+                this.sendEvent(new CanvasEvent(EventTypes.ShapeRemoved, shape));
             });
         });
 
@@ -334,14 +337,14 @@ export class Canvas implements ShapeManager {
         const idToMove = shapeToMove.id;
 
         // selected shape is deleted from the map so the position can be changed
-        this.sendEvent(new CanvasEvent(EventTypes.ShapeRemoved, shapeToMove, 1));
+        this.sendEvent(new CanvasEvent(EventTypes.ShapeRemoved, shapeToMove));
 
         if (toForeGround) {
             //add event moveToForeground
-            this.sendEvent(new CanvasEvent(EventTypes.ShapeAdded, shapeToMove, 1));
+            this.sendEvent(new CanvasEvent(EventTypes.ShapeAdded, shapeToMove));
         } else {
             //add event moveToBackground
-            this.sendEvent(new CanvasEvent(EventTypes.MovedToBackground, shapeToMove, 1));
+            this.sendEvent(new CanvasEvent(EventTypes.MovedToBackground, shapeToMove));
 
         }
     }
@@ -378,9 +381,9 @@ export class Canvas implements ShapeManager {
      * @param event
      */
     sendEvent(event: CanvasEvent) {
-        console.log("New Event:", event.type, event.getId(), event.shape);
+        console.log("New Event:", event.type, event.eventId, event.shape);
         this.eventStream.push(event.copy());
-        //todo send event to backend
+        this.wsService.sendCanvasEvent(event);
         this.handleEvent(event);
     }
 
@@ -388,7 +391,7 @@ export class Canvas implements ShapeManager {
      * method that handles incoming events from the socket instance
      * @param event received CanvasEvent
      */
-    handleEvent(event: CanvasEvent) {
+     handleEvent(event: CanvasEvent) {
         const eventShape = event.shape;
         switch (event.type) {
 

@@ -7,8 +7,7 @@ import {NotFoundView} from "./notFoundView.js";
 //source: https://www.youtube.com/watch?v=6BozpmSjk-Y&ab_channel=dcode
 export const router = async () => {
 
-    //establish socket connection
-    const wss = new WebSocketService();
+
 
     const routes = [
         {path: "/", view: Overview},
@@ -39,13 +38,15 @@ export const router = async () => {
     let match = potentialMatches.find((potentialMatch) => potentialMatch.isMatch);
     const view = new match.route.view();
 
+    //establish socket connection
+    const wss = new WebSocketService();
     if (view instanceof CanvasView) {
         await wss.openConnection();
         const isPathOk = checkCanvasPath();
         console.log("isIdOk", isPathOk);
         if (isPathOk) {
             document.querySelector("#main-page").innerHTML = view.render();
-            init();
+             init(wss);
         } else {
             wss.removeCurrentCanvasRoom();
             document.querySelector("#main-page").innerHTML = new NotFoundView().render();

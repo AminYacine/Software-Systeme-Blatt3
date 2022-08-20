@@ -1,21 +1,15 @@
 export class CanvasEvent {
-    constructor(type, shape, user, color) {
+    constructor(type, shape, color) {
         this.type = type;
         this.shape = shape;
-        this.user = user;
+        // this.user = user;
         this.eventId = CanvasEvent.counter++;
         this.color = color;
     }
     copy() {
-        const copyEvent = new CanvasEvent(this.type, this.shape.copyShape(), this.user, this.color);
+        const copyEvent = new CanvasEvent(this.type, this.shape.copyShape(), this.color);
         copyEvent.eventId--;
         return copyEvent;
-    }
-    incrementIdCounter() {
-        CanvasEvent.counter++;
-    }
-    getId() {
-        return this.eventId;
     }
 }
 CanvasEvent.counter = 0;

@@ -8,6 +8,8 @@ import {CanvasRoom} from "../CanvasRoom.js";
 import {ConnectedEvent} from "../ConnectedEvent.js";
 import {CreateCanvasEvent} from "../frontend/static/CreateCanvasEvent.js";
 import {DeregisterFromCanvasEvent} from "../frontend/static/DeregisterFromCanvasEvent.js";
+import {CanvasEvent} from "../frontend/static/Event.js";
+import {RoomEvent} from "../frontend/static/RoomEvent.js";
 
 export class WsService {
     private clientIdCounter = 1;
@@ -19,7 +21,7 @@ export class WsService {
 
     handleMessage(message: string, client: WebSocket.WebSocket) {
         const event: AbstractEvent = JSON.parse(message);
-        console.log("received message: ", event);
+        console.log("received message: ", event.type);
 
         switch (event.type) {
             case WebSocketEvents.CreateCanvas: {
@@ -82,10 +84,29 @@ export class WsService {
                 break;
             }
             case WebSocketEvents.CanvasEvent: {
+                const roomEvent: RoomEvent = event.value;
 
+                const roomId = roomEvent.roomId;
+                const clientId = roomEvent.clientId;
+                const canvasEvent: CanvasEvent = roomEvent.canvasEvent;
+
+                const room = this.canvasRooms.get(roomId);
+                console.log("all room ids",this.canvasRooms.keys());
+                console.log("event room id:", roomId)
+                console.log("canvas event");
+                if (room !== undefined) {
+                    console.log("room found")
+                    room.addEvent(canvasEvent.eventId, canvasEvent);
+                    const roomClients =  room.getClientsExcept(clientId);
+
+                    this.broadCastEvent(roomClients, new AbstractEvent(WebSocketEvents.CanvasChangedEvent, roomEvent));
+                }
             }
         }
     }
+
+
+
 
     handleConnection(client: WebSocket.WebSocket) {
         const id = this.getNewClientID();

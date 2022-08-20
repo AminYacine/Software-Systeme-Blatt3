@@ -12,7 +12,7 @@ export class WsService {
     }
     handleMessage(message, client) {
         const event = JSON.parse(message);
-        console.log("received message: ", event);
+        console.log("received message: ", event.type);
         switch (event.type) {
             case WebSocketEvents.CreateCanvas: {
                 const createCanvasEvent = event.value;
@@ -65,6 +65,20 @@ export class WsService {
                 break;
             }
             case WebSocketEvents.CanvasEvent: {
+                const roomEvent = event.value;
+                const roomId = roomEvent.roomId;
+                const clientId = roomEvent.clientId;
+                const canvasEvent = roomEvent.canvasEvent;
+                const room = this.canvasRooms.get(roomId);
+                console.log("all room ids", this.canvasRooms.keys());
+                console.log("event room id:", roomId);
+                console.log("canvas event");
+                if (room !== undefined) {
+                    console.log("room found");
+                    room.addEvent(canvasEvent.eventId, canvasEvent);
+                    const roomClients = room.getClientsExcept(clientId);
+                    this.broadCastEvent(roomClients, new AbstractEvent(WebSocketEvents.CanvasChangedEvent, roomEvent));
+                }
             }
         }
     }
