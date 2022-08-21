@@ -12,7 +12,7 @@ import {CanvasEvent} from "./Event.js";
 import {RoomEvent} from "./RoomEvent.js";
 import {Canvas} from "./Canvas.js";
 import {init} from "./init.js";
-import {CanvasEvents} from "./CanvasEvents.js";
+import {GetCanvasEventsResponse} from "./GetCanvasEventsResponse.js";
 import {GetCanvasEvents} from "./GetCanvasEvents.js";
 
 let ws: WebSocket;
@@ -31,6 +31,7 @@ export async function openConnection() {
 
     ws.onmessage = (message) => {
         let msg: AbstractEvent = JSON.parse(message.data)
+        console.log("event:", msg)
 
         switch (msg.type) {
             case WebSocketEvents.CanvasCreated: {
@@ -47,7 +48,7 @@ export async function openConnection() {
                 break;
             }
             case WebSocketEvents.RegisteredForCanvas: {
-                const registeredEvent : RegisteredForCanvasEvent= msg.value;
+                const registeredEvent: RegisteredForCanvasEvent = msg.value;
                 const canvasId = registeredEvent.canvasId;
                 setCurrentCanvasRoom(canvasId);
                 window.history.pushState("", "", `/canvas/${canvasId}`);
@@ -81,11 +82,25 @@ export async function openConnection() {
                 break;
             }
             case WebSocketEvents.GetCanvasEventsResponse: {
-                const roomEvents: CanvasEvents = msg.value;
-                console.log("received events", roomEvents)
+                const roomEvents: GetCanvasEventsResponse = msg.value;
+                const blockedShapesObject = roomEvents.blockedShapes;
+                let  blockedShapes = new Map<number,number>();
+                for (var shapeId in blockedShapesObject) {
+                    blockedShapes.set(Number(shapeId), blockedShapesObject[shapeId])
+                }
+
                 if (roomEvents.canvasId === getCurrentCanvasRoom()) {
                     for (let event of roomEvents.events) {
                         canvas.handleEvent(event.canvasEvent, event.clientId);
+                    }
+                    if (blockedShapes.size > 0) {
+                        for (let shapeId of blockedShapes.keys()) {
+                            const foundShape = canvas.backGroundShapes.get(shapeId);
+                            if (foundShape) {
+                                canvas.blockedShapes.push(foundShape);
+                            }
+                        }
+                        console.log("set blocked shapes", canvas.blockedShapes)
                     }
                 }
                 break;
@@ -179,10 +194,10 @@ export function sendGetCanvasEvents() {
     ws.send(JSON.stringify(
         new AbstractEvent(
             WebSocketEvents.GetCanvasEvents,
-           new GetCanvasEvents(
-               getCurrentCanvasRoom(),
-               getClientId()
-           )
+            new GetCanvasEvents(
+                getCurrentCanvasRoom(),
+                getClientId()
+            )
         )
     ))
 }

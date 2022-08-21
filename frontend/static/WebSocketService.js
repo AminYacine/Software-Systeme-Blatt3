@@ -21,6 +21,7 @@ export async function openConnection() {
     };
     ws.onmessage = (message) => {
         let msg = JSON.parse(message.data);
+        console.log("event:", msg);
         switch (msg.type) {
             case WebSocketEvents.CanvasCreated: {
                 const createdEvent = msg.value;
@@ -68,10 +69,23 @@ export async function openConnection() {
             }
             case WebSocketEvents.GetCanvasEventsResponse: {
                 const roomEvents = msg.value;
-                console.log("received events", roomEvents);
+                const blockedShapesObject = roomEvents.blockedShapes;
+                let blockedShapes = new Map();
+                for (var shapeId in blockedShapesObject) {
+                    blockedShapes.set(Number(shapeId), blockedShapesObject[shapeId]);
+                }
                 if (roomEvents.canvasId === getCurrentCanvasRoom()) {
                     for (let event of roomEvents.events) {
                         canvas.handleEvent(event.canvasEvent, event.clientId);
+                    }
+                    if (blockedShapes.size > 0) {
+                        for (let shapeId of blockedShapes.keys()) {
+                            const foundShape = canvas.backGroundShapes.get(shapeId);
+                            if (foundShape) {
+                                canvas.blockedShapes.push(foundShape);
+                            }
+                        }
+                        console.log("set blocked shapes", canvas.blockedShapes);
                     }
                 }
                 break;

@@ -7,6 +7,9 @@ import {getClientId, sendCanvasEvent} from "./WebSocketService.js";
 import {Circle, Line, Rectangle, Triangle} from "./Shapes.js";
 
 export class Canvas implements ShapeManager {
+    get backGroundShapes(): Map<number, Shape> {
+        return this._backGroundShapes;
+    }
 
     private ctx: CanvasRenderingContext2D;
 
@@ -19,12 +22,12 @@ export class Canvas implements ShapeManager {
     //holds the current created shape with corresponding id
     private creationShapes: Map<number, Shape> = new Map();
     //holds every shape after being created
-    private backGroundShapes: Map<number, Shape> = new Map();
+    private _backGroundShapes: Map<number, Shape> = new Map();
     //holds temporarily all the shapes that are clicked
     private shapesOnClickedPoint: Shape[] = [];
     //holds every selected shape
     private selectedShapes: Shape[] = [];
-    private blockedShapes: Shape[] = [];
+    blockedShapes: Shape[] = [];
 
     private eventStream: CanvasEvent [] = [];
 
@@ -138,7 +141,7 @@ export class Canvas implements ShapeManager {
         this.ctx.clearRect(0, 0, this.width, this.height);
 
         //draw background shapes
-        this.backGroundShapes.forEach((shape) => {
+        this._backGroundShapes.forEach((shape) => {
             let isSelected = false;
             for (let selectedShape of this.selectedShapes) {
                 if (shape.id === selectedShape.id) {
@@ -175,7 +178,7 @@ export class Canvas implements ShapeManager {
 
 
     makeShapeTransparent(shape: Shape) {
-        const backgroundShape = this.backGroundShapes.get(shape.id)
+        const backgroundShape = this._backGroundShapes.get(shape.id)
         backgroundShape.setFillColor("transparent");
         backgroundShape.setOutlineColor("transparent");
         this.selectedShapes = [];
@@ -205,9 +208,9 @@ export class Canvas implements ShapeManager {
     isShapeOnClickedPoint(x: number, y: number): boolean {
         this.shapesOnClickedPoint = [];
         let isShapeOnPoint: boolean = false;
-        this.backGroundShapes.forEach((value) => {
-            if (value.isSelected(x, y)) {
-                this.shapesOnClickedPoint.push(value);
+        this._backGroundShapes.forEach((backgroundShape) => {
+            if (backgroundShape.isSelected(x, y) && !this.isShapeBlocked(backgroundShape.id)) {
+                this.shapesOnClickedPoint.push(backgroundShape);
                 isShapeOnPoint = true;
             }
         });
@@ -353,7 +356,6 @@ export class Canvas implements ShapeManager {
         } else {
 
             this.sendEvent(new CanvasEvent(EventTypes.MovedToBackground, Canvas.getShapeType(shapeToMove), shapeToMove));
-
         }
     }
 
@@ -411,13 +413,13 @@ export class Canvas implements ShapeManager {
         switch (event.type) {
 
             case EventTypes.ShapeRemoved: {
-                this.backGroundShapes.delete(eventShape.id);
+                this._backGroundShapes.delete(eventShape.id);
                 this.selectedShapes = this.selectedShapes.filter(shape => shape.id !== eventShape.id);
                 this.blockedShapes = this.blockedShapes.filter(shape => shape.id !== eventShape.id);
                 break;
             }
             case EventTypes.ShapeAdded: {
-                this.backGroundShapes.set(eventShape.id, eventShape);
+                this._backGroundShapes.set(eventShape.id, eventShape);
                 break;
             }
             case EventTypes.MovedToBackground: {
@@ -425,11 +427,11 @@ export class Canvas implements ShapeManager {
                 // and the second being the shapes map holding the rest of the shapes.
                 const helperMap: Map<number, Shape> = new Map();
                 helperMap.set(eventShape.id, eventShape);
-                this.backGroundShapes = new Map([...helperMap, ...this.backGroundShapes]);
+                this._backGroundShapes = new Map([...helperMap, ...this._backGroundShapes]);
                 break;
             }
             case EventTypes.ShapeUnselected: {
-                const shape = this.backGroundShapes.get(eventShape.id);
+                const shape = this._backGroundShapes.get(eventShape.id);
                 if (shape !== undefined) {
                     if (fromCurrentUser) {
                         this.selectedShapes = this.selectedShapes.filter(shape => shape.id !== eventShape.id);
@@ -441,7 +443,7 @@ export class Canvas implements ShapeManager {
                 break;
             }
             case EventTypes.ShapeSelected: {
-                const shape = this.backGroundShapes.get(eventShape.id);
+                const shape = this._backGroundShapes.get(eventShape.id);
                 if (shape !== undefined) {
                     //if the current user has selected a shape it will be pushed to the selected shapes, else it will be
                     // blocked for selection
@@ -483,6 +485,16 @@ export class Canvas implements ShapeManager {
                 return Triangle.fromJSON(JSON.stringify(event.shape));
             }
         }
+    }
+
+    private isShapeBlocked(shapeId: number): boolean {
+        for (let blockedShape of this.blockedShapes) {
+            if (blockedShape.id === shapeId){
+                console.log("shape blocked", shapeId)
+               return true;
+            }
+        }
+        return false;
     }
 
     static getShapeType(shape: Shape) {

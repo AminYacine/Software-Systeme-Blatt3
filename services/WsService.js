@@ -4,7 +4,7 @@ import { CanvasCreatedEvent } from "../ws-events/CanvasCreatedEvent.js";
 import { WebSocketEvents } from "../frontend/static/WebSocketEvents.js";
 import { CanvasRoom } from "../CanvasRoom.js";
 import { ConnectedEvent } from "../ConnectedEvent.js";
-import { CanvasEvents } from "../frontend/static/CanvasEvents.js";
+import { GetCanvasEventsResponse } from "../frontend/static/GetCanvasEventsResponse.js";
 export class WsService {
     constructor() {
         this.clientIdCounter = 1;
@@ -63,13 +63,13 @@ export class WsService {
                 const dto = event.value;
                 const clientId = dto.clientId;
                 const canvasId = dto.canvasId;
-                console.log("clientId und canvas id", clientId, canvasId);
                 const room = this.canvasRooms.get(canvasId);
                 if (room) {
                     if (this.checkClientId(clientId)) {
                         const events = room.getCurrentEvents();
-                        console.log("events", events);
-                        client.send(JSON.stringify(new AbstractEvent(WebSocketEvents.GetCanvasEventsResponse, new CanvasEvents(canvasId, events))));
+                        const res = new GetCanvasEventsResponse(canvasId, events, Object.fromEntries(room.getSelectedShapes()));
+                        client.send(JSON.stringify(new AbstractEvent(WebSocketEvents.GetCanvasEventsResponse, res)));
+                        console.log("send selected shapes", res);
                     }
                 }
                 break;
@@ -77,7 +77,6 @@ export class WsService {
             case WebSocketEvents.SessionID: {
                 const id = event.value;
                 this.clients.set(id, client);
-                console.log("clients:", this.clients.keys());
                 break;
             }
             case WebSocketEvents.CanvasEvent: {
@@ -85,7 +84,6 @@ export class WsService {
                 const roomId = roomEvent.roomId;
                 const clientId = roomEvent.clientId;
                 const room = this.canvasRooms.get(roomId);
-                console.log("all room ids", this.canvasRooms.keys());
                 if (room !== undefined) {
                     room.addEvent(roomEvent);
                     const roomClients = room.getClientsExcept(clientId);

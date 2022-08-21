@@ -8,7 +8,7 @@ export class Canvas {
         //holds the current created shape with corresponding id
         this.creationShapes = new Map();
         //holds every shape after being created
-        this.backGroundShapes = new Map();
+        this._backGroundShapes = new Map();
         //holds temporarily all the shapes that are clicked
         this.shapesOnClickedPoint = [];
         //holds every selected shape
@@ -60,6 +60,9 @@ export class Canvas {
             this.handleNewEvent(eventInput.value);
         });
     }
+    get backGroundShapes() {
+        return this._backGroundShapes;
+    }
     handleNewEvent(eventId) {
         const myEvent = this.eventStream.find(event => {
             return event.eventId === Number(eventId);
@@ -98,7 +101,7 @@ export class Canvas {
         //used to reset the canvas
         this.ctx.clearRect(0, 0, this.width, this.height);
         //draw background shapes
-        this.backGroundShapes.forEach((shape) => {
+        this._backGroundShapes.forEach((shape) => {
             let isSelected = false;
             for (let selectedShape of this.selectedShapes) {
                 if (shape.id === selectedShape.id) {
@@ -129,7 +132,7 @@ export class Canvas {
         }
     }
     makeShapeTransparent(shape) {
-        const backgroundShape = this.backGroundShapes.get(shape.id);
+        const backgroundShape = this._backGroundShapes.get(shape.id);
         backgroundShape.setFillColor("transparent");
         backgroundShape.setOutlineColor("transparent");
         this.selectedShapes = [];
@@ -156,9 +159,9 @@ export class Canvas {
     isShapeOnClickedPoint(x, y) {
         this.shapesOnClickedPoint = [];
         let isShapeOnPoint = false;
-        this.backGroundShapes.forEach((value) => {
-            if (value.isSelected(x, y)) {
-                this.shapesOnClickedPoint.push(value);
+        this._backGroundShapes.forEach((backgroundShape) => {
+            if (backgroundShape.isSelected(x, y) && !this.isShapeBlocked(backgroundShape.id)) {
+                this.shapesOnClickedPoint.push(backgroundShape);
                 isShapeOnPoint = true;
             }
         });
@@ -325,13 +328,13 @@ export class Canvas {
         }
         switch (event.type) {
             case EventTypes.ShapeRemoved: {
-                this.backGroundShapes.delete(eventShape.id);
+                this._backGroundShapes.delete(eventShape.id);
                 this.selectedShapes = this.selectedShapes.filter(shape => shape.id !== eventShape.id);
                 this.blockedShapes = this.blockedShapes.filter(shape => shape.id !== eventShape.id);
                 break;
             }
             case EventTypes.ShapeAdded: {
-                this.backGroundShapes.set(eventShape.id, eventShape);
+                this._backGroundShapes.set(eventShape.id, eventShape);
                 break;
             }
             case EventTypes.MovedToBackground: {
@@ -339,11 +342,11 @@ export class Canvas {
                 // and the second being the shapes map holding the rest of the shapes.
                 const helperMap = new Map();
                 helperMap.set(eventShape.id, eventShape);
-                this.backGroundShapes = new Map([...helperMap, ...this.backGroundShapes]);
+                this._backGroundShapes = new Map([...helperMap, ...this._backGroundShapes]);
                 break;
             }
             case EventTypes.ShapeUnselected: {
-                const shape = this.backGroundShapes.get(eventShape.id);
+                const shape = this._backGroundShapes.get(eventShape.id);
                 if (shape !== undefined) {
                     if (fromCurrentUser) {
                         this.selectedShapes = this.selectedShapes.filter(shape => shape.id !== eventShape.id);
@@ -356,7 +359,7 @@ export class Canvas {
                 break;
             }
             case EventTypes.ShapeSelected: {
-                const shape = this.backGroundShapes.get(eventShape.id);
+                const shape = this._backGroundShapes.get(eventShape.id);
                 if (shape !== undefined) {
                     //if the current user has selected a shape it will be pushed to the selected shapes, else it will be
                     // blocked for selection
@@ -397,6 +400,15 @@ export class Canvas {
                 return Triangle.fromJSON(JSON.stringify(event.shape));
             }
         }
+    }
+    isShapeBlocked(shapeId) {
+        for (let blockedShape of this.blockedShapes) {
+            if (blockedShape.id === shapeId) {
+                console.log("shape blocked", shapeId);
+                return true;
+            }
+        }
+        return false;
     }
     static getShapeType(shape) {
         if (shape instanceof Line) {

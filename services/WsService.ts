@@ -10,8 +10,7 @@ import {CreateCanvasEvent} from "../frontend/static/CreateCanvasEvent.js";
 import {DeregisterFromCanvasEvent} from "../frontend/static/DeregisterFromCanvasEvent.js";
 import {RoomEvent} from "../frontend/static/RoomEvent.js";
 import {GetCanvasEvents} from "../frontend/static/GetCanvasEvents.js";
-import {CanvasEvents} from "../frontend/static/CanvasEvents.js";
-import {initCanvasView} from "../frontend/static/WebSocketService";
+import {GetCanvasEventsResponse} from "../frontend/static/GetCanvasEventsResponse.js";
 
 export class WsService {
     private clientIdCounter = 1;
@@ -38,7 +37,7 @@ export class WsService {
                     canvas.addSession(clientId, client);
                     this.canvasRooms.set(canvas.id, canvas);
 
-                    this.broadCastEvent( Array.from(this.clients.values()) ,new AbstractEvent(
+                    this.broadCastEvent(Array.from(this.clients.values()), new AbstractEvent(
                         WebSocketEvents.CanvasCreated,
                         new CanvasCreatedEvent(canvas.id, canvasName, clientId)
                     ));
@@ -82,17 +81,17 @@ export class WsService {
                 const dto: GetCanvasEvents = event.value;
                 const clientId = dto.clientId;
                 const canvasId = dto.canvasId;
-                console.log("clientId und canvas id", clientId, canvasId)
                 const room = this.canvasRooms.get(canvasId);
 
                 if (room) {
                     if (this.checkClientId(clientId)) {
                         const events = room.getCurrentEvents();
-                        console.log("events",events)
+                        const res = new GetCanvasEventsResponse(canvasId, events, Object.fromEntries(room.getSelectedShapes()) )
                         client.send(JSON.stringify(new AbstractEvent(
                             WebSocketEvents.GetCanvasEventsResponse,
-                            new CanvasEvents(canvasId, events)
+                            res
                         )));
+                        console.log("send selected shapes", res)
                     }
                 }
                 break;
@@ -100,7 +99,6 @@ export class WsService {
             case WebSocketEvents.SessionID: {
                 const id: number = event.value;
                 this.clients.set(id, client);
-                console.log("clients:", this.clients.keys())
                 break;
             }
             case WebSocketEvents.CanvasEvent: {
@@ -111,10 +109,9 @@ export class WsService {
                 const clientId = roomEvent.clientId;
 
                 const room = this.canvasRooms.get(roomId);
-                console.log("all room ids",this.canvasRooms.keys());
                 if (room !== undefined) {
                     room.addEvent(roomEvent);
-                    const roomClients =  room.getClientsExcept(clientId);
+                    const roomClients = room.getClientsExcept(clientId);
 
                     this.broadCastEvent(roomClients, new AbstractEvent(WebSocketEvents.CanvasChangedEvent, roomEvent));
                 }
@@ -134,7 +131,7 @@ export class WsService {
 
     private broadCastEvent(clients: WebSocket[], event: AbstractEvent) {
         clients.forEach(client => {
-            client.send(JSON.stringify( event));
+            client.send(JSON.stringify(event));
         });
     }
 

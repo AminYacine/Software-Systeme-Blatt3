@@ -1,8 +1,7 @@
 import * as WebSocket from "ws";
 import {v4} from "uuid";
-import {CanvasEvent, EventTypes} from "./frontend/static/Event.js";
+import { EventTypes} from "./frontend/static/Event.js";
 import {Shape} from "./frontend/static/types.js";
-import {Canvas} from "./frontend/static/Canvas.js";
 import {RoomEvent} from "./frontend/static/RoomEvent.js";
 
 export class CanvasRoom {
@@ -41,6 +40,7 @@ export class CanvasRoom {
             case EventTypes.ShapeRemoved: {
                 this.shapesInCanvas.delete(shape.id);
                 this.eventsInCanvas.delete(shape.id);
+                this.selectedShapes.delete(shape.id);
                 break;
             }
             case EventTypes.MovedToBackground: {
@@ -62,6 +62,7 @@ export class CanvasRoom {
                 break;
             }
         }
+        console.log("selectedShapes", this.selectedShapes);
 
     }
 
@@ -82,5 +83,9 @@ export class CanvasRoom {
             }
         });
         return filteredClients;
+    }
+
+    getSelectedShapes() {
+        return this.selectedShapes;
     }
 }

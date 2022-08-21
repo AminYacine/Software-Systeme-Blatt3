@@ -29,6 +29,7 @@ export class CanvasRoom {
             case EventTypes.ShapeRemoved: {
                 this.shapesInCanvas.delete(shape.id);
                 this.eventsInCanvas.delete(shape.id);
+                this.selectedShapes.delete(shape.id);
                 break;
             }
             case EventTypes.MovedToBackground: {
@@ -49,6 +50,7 @@ export class CanvasRoom {
                 break;
             }
         }
+        console.log("selectedShapes", this.selectedShapes);
     }
     removeEvent(id) {
         this.eventsInCanvas.delete(id);
@@ -64,6 +66,9 @@ export class CanvasRoom {
             }
         });
         return filteredClients;
+    }
+    getSelectedShapes() {
+        return this.selectedShapes;
     }
 }
 //# sourceMappingURL=CanvasRoom.js.map
