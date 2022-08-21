@@ -9,5 +9,7 @@ export var WebSocketEvents;
     WebSocketEvents["CanvasCreated"] = "CanvasCreated";
     WebSocketEvents["DeregisterForCanvas"] = "DeregisterForCanvas";
     WebSocketEvents["CanvasChangedEvent"] = "CanvasChangedEvent";
+    WebSocketEvents["GetCanvasEvents"] = "GetCanvasEvents";
+    WebSocketEvents["GetCanvasEventsResponse"] = "GetCanvasEventsResponse";
 })(WebSocketEvents || (WebSocketEvents = {}));
 //# sourceMappingURL=WebSocketEvents.js.map

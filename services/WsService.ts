@@ -8,8 +8,10 @@ import {CanvasRoom} from "../CanvasRoom.js";
 import {ConnectedEvent} from "../ConnectedEvent.js";
 import {CreateCanvasEvent} from "../frontend/static/CreateCanvasEvent.js";
 import {DeregisterFromCanvasEvent} from "../frontend/static/DeregisterFromCanvasEvent.js";
-import {CanvasEvent} from "../frontend/static/Event.js";
 import {RoomEvent} from "../frontend/static/RoomEvent.js";
+import {GetCanvasEvents} from "../frontend/static/GetCanvasEvents.js";
+import {CanvasEvents} from "../frontend/static/CanvasEvents.js";
+import {initCanvasView} from "../frontend/static/WebSocketService";
 
 export class WsService {
     private clientIdCounter = 1;
@@ -56,7 +58,7 @@ export class WsService {
                             room.addSession(clientId, client);
                             client.send(JSON.stringify(new AbstractEvent(
                                 WebSocketEvents.RegisteredForCanvas,
-                                new RegisteredForCanvasEvent(canvasId, room.getCurrentEvents())
+                                new RegisteredForCanvasEvent(canvasId)
                             )));
                             console.log("send registeredEvent");
                         }
@@ -74,7 +76,25 @@ export class WsService {
                         console.log("removed from canvas");
                     }
                 }
+                break;
+            }
+            case WebSocketEvents.GetCanvasEvents : {
+                const dto: GetCanvasEvents = event.value;
+                const clientId = dto.clientId;
+                const canvasId = dto.canvasId;
+                console.log("clientId und canvas id", clientId, canvasId)
+                const room = this.canvasRooms.get(canvasId);
 
+                if (room) {
+                    if (this.checkClientId(clientId)) {
+                        const events = room.getCurrentEvents();
+                        console.log("events",events)
+                        client.send(JSON.stringify(new AbstractEvent(
+                            WebSocketEvents.GetCanvasEventsResponse,
+                            new CanvasEvents(canvasId, events)
+                        )));
+                    }
+                }
                 break;
             }
             case WebSocketEvents.SessionID: {
@@ -89,15 +109,11 @@ export class WsService {
 
                 const roomId = roomEvent.roomId;
                 const clientId = roomEvent.clientId;
-                const canvasEvent: CanvasEvent = roomEvent.canvasEvent;
 
                 const room = this.canvasRooms.get(roomId);
                 console.log("all room ids",this.canvasRooms.keys());
-                console.log("event room id:", roomId)
-                console.log("canvas event", canvasEvent);
                 if (room !== undefined) {
-                    console.log("room found")
-                    room.addEvent(canvasEvent.eventId, canvasEvent);
+                    room.addEvent(roomEvent);
                     const roomClients =  room.getClientsExcept(clientId);
 
                     this.broadCastEvent(roomClients, new AbstractEvent(WebSocketEvents.CanvasChangedEvent, roomEvent));
@@ -105,8 +121,6 @@ export class WsService {
             }
         }
     }
-
-
 
 
     handleConnection(client: WebSocket.WebSocket) {

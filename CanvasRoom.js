@@ -1,13 +1,13 @@
 import { v4 } from "uuid";
-import { CanvasEvent, EventTypes } from "./frontend/static/Event.js";
-import { Circle, Line, Rectangle, Triangle } from "./frontend/static/Shapes.js";
+import { EventTypes } from "./frontend/static/Event.js";
 export class CanvasRoom {
     constructor(name) {
         this.name = name;
         this.clients = new Map();
         this.shapesInCanvas = new Map();
-        this.blockedShapes = new Map();
+        this.selectedShapes = new Map();
         this.eventsInCanvas = new Map();
+        //generates a random uuid
         this.id = v4();
     }
     addSession(id, session) {
@@ -16,39 +16,45 @@ export class CanvasRoom {
     removeSession(clientId) {
         this.clients.delete(clientId);
     }
-    addEvent(id, canvasEvent) {
-        this.eventsInCanvas.set(id, canvasEvent);
+    addEvent(roomEvent) {
+        const canvasEvent = roomEvent.canvasEvent;
+        const clientId = roomEvent.clientId;
+        const shape = canvasEvent.shape;
+        switch (canvasEvent.type) {
+            case EventTypes.ShapeAdded: {
+                this.shapesInCanvas.set(shape.id, shape);
+                this.eventsInCanvas.set(shape.id, roomEvent);
+                break;
+            }
+            case EventTypes.ShapeRemoved: {
+                this.shapesInCanvas.delete(shape.id);
+                this.eventsInCanvas.delete(shape.id);
+                break;
+            }
+            case EventTypes.MovedToBackground: {
+                const helperMap = new Map();
+                helperMap.set(shape.id, shape);
+                this.shapesInCanvas = new Map([...helperMap, ...this.shapesInCanvas]);
+                const helperMap2 = new Map();
+                helperMap2.set(shape.id, roomEvent);
+                this.eventsInCanvas = new Map([...helperMap2, ...this.eventsInCanvas]);
+                break;
+            }
+            case EventTypes.ShapeSelected: {
+                this.selectedShapes.set(shape.id, clientId);
+                break;
+            }
+            case EventTypes.ShapeUnselected: {
+                this.selectedShapes.delete(shape.id);
+                break;
+            }
+        }
     }
     removeEvent(id) {
         this.eventsInCanvas.delete(id);
     }
     getCurrentEvents() {
-        const eventArray = [];
-        this.shapesInCanvas.forEach((shape, id) => {
-            eventArray.push(new CanvasEvent(EventTypes.ShapeAdded, this.getShapeType(shape), shape));
-        });
-        return eventArray;
-    }
-    handleCanvasEvent(event) {
-        const eventShape = event.shape;
-        switch (event.type) {
-            case EventTypes.ShapeAdded: {
-                this.shapesInCanvas.set(eventShape.id, eventShape);
-                break;
-            }
-            case EventTypes.ShapeRemoved: {
-                this.shapesInCanvas.delete(eventShape.id);
-                break;
-            }
-            case EventTypes.MovedToBackground: {
-                const helperMap = new Map();
-                helperMap.set(eventShape.id, eventShape);
-                this.shapesInCanvas = new Map([...helperMap, ...this.shapesInCanvas]);
-                break;
-            }
-            case EventTypes.ShapeSelected: {
-            }
-        }
+        return Array.from(this.eventsInCanvas.values());
     }
     getClientsExcept(clientId) {
         let filteredClients = [];
@@ -58,20 +64,6 @@ export class CanvasRoom {
             }
         });
         return filteredClients;
-    }
-    getShapeType(shape) {
-        if (shape instanceof Line) {
-            return "Line";
-        }
-        else if (shape instanceof Rectangle) {
-            return "Rectangle";
-        }
-        else if (shape instanceof Circle) {
-            return "Circle";
-        }
-        else if (shape instanceof Triangle) {
-            return "Triangle";
-        }
     }
 }
 //# sourceMappingURL=CanvasRoom.js.map

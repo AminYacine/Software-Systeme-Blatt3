@@ -7,6 +7,7 @@ import { CreateCanvasEvent } from "./CreateCanvasEvent.js";
 import { DeregisterFromCanvasEvent } from "./DeregisterFromCanvasEvent.js";
 import { RoomEvent } from "./RoomEvent.js";
 import { init } from "./init.js";
+import { GetCanvasEvents } from "./GetCanvasEvents.js";
 let ws;
 let openRooms = [];
 let canvas;
@@ -36,11 +37,10 @@ export async function openConnection() {
                 break;
             }
             case WebSocketEvents.RegisteredForCanvas: {
-                console.log("registered For canvas");
                 const registeredEvent = msg.value;
-                console.log(registeredEvent.canvasId);
-                setCurrentCanvasRoom(registeredEvent.canvasId);
-                window.history.pushState("", "", `/canvas/${registeredEvent.canvasId}`);
+                const canvasId = registeredEvent.canvasId;
+                setCurrentCanvasRoom(canvasId);
+                window.history.pushState("", "", `/canvas/${canvasId}`);
                 router();
                 break;
             }
@@ -66,8 +66,15 @@ export async function openConnection() {
                 }
                 break;
             }
-            default: {
-                console.log("message", message.data);
+            case WebSocketEvents.GetCanvasEventsResponse: {
+                const roomEvents = msg.value;
+                console.log("received events", roomEvents);
+                if (roomEvents.canvasId === getCurrentCanvasRoom()) {
+                    for (let event of roomEvents.events) {
+                        canvas.handleEvent(event.canvasEvent, event.clientId);
+                    }
+                }
+                break;
             }
         }
     };
@@ -121,7 +128,7 @@ function updateRoomListInHtml() {
             const listElem = document.createElement("li");
             listElem.innerHTML = `${room.name} (${room.id})`;
             listElem.setAttribute("class", "clickable");
-            listElem.addEventListener("click", () => sendRegisterForCanvas(room.id));
+            listElem.addEventListener("click", () => sendRegisterForCanvasEvent(room.id));
             list.appendChild(listElem);
         });
     }
@@ -129,8 +136,11 @@ function updateRoomListInHtml() {
 function sendCreateCanvasEvent(canvasName) {
     ws.send(JSON.stringify(new AbstractEvent(WebSocketEvents.CreateCanvas, new CreateCanvasEvent(canvasName, getClientId()))));
 }
-function sendRegisterForCanvas(canvasId) {
+function sendRegisterForCanvasEvent(canvasId) {
     ws.send(JSON.stringify(new AbstractEvent(WebSocketEvents.RegisterForCanvas, new RegisterForCanvas(getClientId(), canvasId))));
+}
+export function sendGetCanvasEvents() {
+    ws.send(JSON.stringify(new AbstractEvent(WebSocketEvents.GetCanvasEvents, new GetCanvasEvents(getCurrentCanvasRoom(), getClientId()))));
 }
 export function getClientId() {
     const clientId = sessionStorage.getItem("clientID");

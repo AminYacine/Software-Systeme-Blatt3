@@ -38,6 +38,7 @@ export const router = async () => {
         console.log("isIdOk", isPathOk);
         if (isPathOk) {
             document.querySelector("#main-page").innerHTML = view.render();
+            wss.sendGetCanvasEvents();
             wss.initCanvasView();
         }
         else {

@@ -1,1 +1,1 @@
-{"version":3,"file":"RegisteredForCanvasEvent.js","sourceRoot":"","sources":["RegisteredForCanvasEvent.ts"],"names":[],"mappings":"AAEA,MAAM,OAAO,wBAAwB;IACjC,YAAmB,QAAgB,EAAS,eAA8B;QAAvD,aAAQ,GAAR,QAAQ,CAAQ;QAAS,oBAAe,GAAf,eAAe,CAAe;IAC1E,CAAC;CAEJ"}
+{"version":3,"file":"RegisteredForCanvasEvent.js","sourceRoot":"","sources":["RegisteredForCanvasEvent.ts"],"names":[],"mappings":"AACA,MAAM,OAAO,wBAAwB;IACjC,YAAmB,QAAgB;QAAhB,aAAQ,GAAR,QAAQ,CAAQ;IACnC,CAAC;CAEJ"}

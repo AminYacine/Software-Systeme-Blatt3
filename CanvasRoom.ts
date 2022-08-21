@@ -2,18 +2,20 @@ import * as WebSocket from "ws";
 import {v4} from "uuid";
 import {CanvasEvent, EventTypes} from "./frontend/static/Event.js";
 import {Shape} from "./frontend/static/types.js";
-import {Circle, Line, Rectangle, Triangle} from "./frontend/static/Shapes.js";
+import {Canvas} from "./frontend/static/Canvas.js";
+import {RoomEvent} from "./frontend/static/RoomEvent.js";
 
 export class CanvasRoom {
     id: string;
     private clients: Map<number, WebSocket> = new Map();
     private shapesInCanvas: Map<number, Shape> = new Map();
-    private blockedShapes: Map<number, Shape> = new Map();
+    private selectedShapes: Map<number, number> = new Map();
 
-    private eventsInCanvas: Map<number, CanvasEvent> = new Map();
+    private eventsInCanvas: Map<number, RoomEvent> = new Map();
 
 
     constructor(public name: string) {
+        //generates a random uuid
         this.id = v4();
     }
 
@@ -25,43 +27,50 @@ export class CanvasRoom {
         this.clients.delete(clientId);
     }
 
-    addEvent(id: number, canvasEvent: CanvasEvent) {
-        this.eventsInCanvas.set(id, canvasEvent);
+    addEvent(roomEvent: RoomEvent) {
+        const canvasEvent = roomEvent.canvasEvent;
+        const clientId = roomEvent.clientId;
+        const shape = canvasEvent.shape;
+
+        switch (canvasEvent.type) {
+            case EventTypes.ShapeAdded: {
+                this.shapesInCanvas.set(shape.id, shape);
+                this.eventsInCanvas.set(shape.id, roomEvent);
+                break;
+            }
+            case EventTypes.ShapeRemoved: {
+                this.shapesInCanvas.delete(shape.id);
+                this.eventsInCanvas.delete(shape.id);
+                break;
+            }
+            case EventTypes.MovedToBackground: {
+                const helperMap: Map<number, Shape> = new Map();
+                helperMap.set(shape.id, shape);
+                this.shapesInCanvas = new Map([...helperMap, ...this.shapesInCanvas]);
+
+                const helperMap2: Map<number, RoomEvent> = new Map();
+                helperMap2.set(shape.id, roomEvent);
+                this.eventsInCanvas = new Map([...helperMap2, ...this.eventsInCanvas]);
+                break;
+            }
+            case EventTypes.ShapeSelected: {
+                this.selectedShapes.set(shape.id, clientId);
+                break;
+            }
+            case EventTypes.ShapeUnselected: {
+                this.selectedShapes.delete(shape.id);
+                break;
+            }
+        }
+
     }
 
     removeEvent(id: number) {
         this.eventsInCanvas.delete(id);
     }
 
-    getCurrentEvents(): CanvasEvent[] {
-        const eventArray: CanvasEvent[] = [];
-        this.shapesInCanvas.forEach((shape, id) => {
-            eventArray.push(new CanvasEvent(EventTypes.ShapeAdded, this.getShapeType(shape),shape));
-        });
-        return eventArray;
-    }
-
-    handleCanvasEvent(event: CanvasEvent) {
-        const eventShape = event.shape;
-        switch (event.type) {
-            case EventTypes.ShapeAdded: {
-                this.shapesInCanvas.set(eventShape.id, eventShape);
-                break;
-            }
-            case EventTypes.ShapeRemoved: {
-                this.shapesInCanvas.delete(eventShape.id);
-                break;
-            }
-            case EventTypes.MovedToBackground: {
-                const helperMap: Map<number, Shape> = new Map();
-                helperMap.set(eventShape.id, eventShape);
-                this.shapesInCanvas = new Map([...helperMap, ...this.shapesInCanvas]);
-                break;
-            }
-            case EventTypes.ShapeSelected: {
-
-            }
-        }
+    getCurrentEvents(): RoomEvent[] {
+       return Array.from(this.eventsInCanvas.values());
     }
 
     getClientsExcept(clientId: number): WebSocket[] {
@@ -73,17 +82,5 @@ export class CanvasRoom {
             }
         });
         return filteredClients;
-    }
-
-    private getShapeType(shape) {
-        if (shape instanceof Line) {
-            return "Line";
-        } else if (shape instanceof Rectangle) {
-            return "Rectangle";
-        } else if (shape instanceof Circle) {
-            return "Circle";
-        } else if (shape instanceof Triangle){
-            return "Triangle";
-        }
     }
 }
