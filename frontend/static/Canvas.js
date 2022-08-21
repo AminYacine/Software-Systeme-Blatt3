@@ -322,6 +322,7 @@ export class Canvas {
     handleEvent(event, userId) {
         const fromCurrentUser = userId === getClientId();
         let eventShape = event.shape;
+        console.log(eventShape.id);
         //only needs to generate new instance if event is not from current user
         if (!fromCurrentUser) {
             eventShape = Canvas.getSpecificShape(event);

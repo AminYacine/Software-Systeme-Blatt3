@@ -84,9 +84,9 @@ export async function openConnection() {
             case WebSocketEvents.GetCanvasEventsResponse: {
                 const roomEvents: GetCanvasEventsResponse = msg.value;
                 const blockedShapesObject = roomEvents.blockedShapes;
-                let  blockedShapes = new Map<number,number>();
+                let  blockedShapes = new Map<string,number>();
                 for (var shapeId in blockedShapesObject) {
-                    blockedShapes.set(Number(shapeId), blockedShapesObject[shapeId])
+                    blockedShapes.set(shapeId, blockedShapesObject[shapeId])
                 }
 
                 if (roomEvents.canvasId === getCurrentCanvasRoom()) {

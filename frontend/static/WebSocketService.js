@@ -72,7 +72,7 @@ export async function openConnection() {
                 const blockedShapesObject = roomEvents.blockedShapes;
                 let blockedShapes = new Map();
                 for (var shapeId in blockedShapesObject) {
-                    blockedShapes.set(Number(shapeId), blockedShapesObject[shapeId]);
+                    blockedShapes.set(shapeId, blockedShapesObject[shapeId]);
                 }
                 if (roomEvents.canvasId === getCurrentCanvasRoom()) {
                     for (let event of roomEvents.events) {

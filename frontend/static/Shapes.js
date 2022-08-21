@@ -1,3 +1,4 @@
+import { getClientId } from "./WebSocketService.js";
 export class Point2D {
     constructor(x, y) {
         this.x = x;
@@ -19,7 +20,8 @@ class AbstractShape {
             this.id = specificId;
         }
         else {
-            this.id = AbstractShape.counter++;
+            this.id = `${getClientId()}id${AbstractShape.counter++}`;
+            // this.id = AbstractShape.counter++;
         }
     }
     setFillColor(color) {

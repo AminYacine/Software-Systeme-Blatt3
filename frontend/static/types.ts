@@ -1,7 +1,7 @@
 import {Point2D} from "./Shapes.js";
 
 export interface Shape {
-    readonly id: number;
+    readonly id: string;
     fillColor: string;
     strokeColor: string;
 

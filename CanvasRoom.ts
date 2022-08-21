@@ -7,10 +7,10 @@ import {RoomEvent} from "./frontend/static/RoomEvent.js";
 export class CanvasRoom {
     id: string;
     private clients: Map<number, WebSocket> = new Map();
-    private shapesInCanvas: Map<number, Shape> = new Map();
-    private selectedShapes: Map<number, number> = new Map();
+    private shapesInCanvas: Map<string, Shape> = new Map();
+    private selectedShapes: Map<string, number> = new Map();
 
-    private eventsInCanvas: Map<number, RoomEvent> = new Map();
+    private eventsInCanvas: Map<string, RoomEvent> = new Map();
 
 
     constructor(public name: string) {
@@ -44,11 +44,11 @@ export class CanvasRoom {
                 break;
             }
             case EventTypes.MovedToBackground: {
-                const helperMap: Map<number, Shape> = new Map();
+                const helperMap: Map<string, Shape> = new Map();
                 helperMap.set(shape.id, shape);
                 this.shapesInCanvas = new Map([...helperMap, ...this.shapesInCanvas]);
 
-                const helperMap2: Map<number, RoomEvent> = new Map();
+                const helperMap2: Map<string, RoomEvent> = new Map();
                 helperMap2.set(shape.id, roomEvent);
                 this.eventsInCanvas = new Map([...helperMap2, ...this.eventsInCanvas]);
                 break;
@@ -66,7 +66,7 @@ export class CanvasRoom {
 
     }
 
-    removeEvent(id: number) {
+    removeEvent(id: string) {
         this.eventsInCanvas.delete(id);
     }
 

@@ -1,4 +1,5 @@
 import {Shape, ShapeFactory, ShapeManager} from "./types.js";
+import {getClientId} from "./WebSocketService.js";
 
 export class Point2D {
     constructor(readonly x: number, readonly y: number) {
@@ -18,15 +19,16 @@ export class Point2D {
 
 class AbstractShape {
     private static counter: number = 0;
-    readonly id: number;
+    readonly id: string;
     fillColor: string;
     strokeColor: string;
 
-    constructor(specificId?: number) {
+    constructor(specificId?: string) {
         if (specificId) {
             this.id = specificId;
         } else {
-            this.id = AbstractShape.counter++;
+            this.id = `${getClientId()}id${AbstractShape.counter++}`;
+            // this.id = AbstractShape.counter++;
         }
     }
 
@@ -81,7 +83,7 @@ export class SelectionFactory implements ShapeFactory {
     private oldShape: Shape;
     private newShape: Shape;
     private lastMousePos: Point2D;
-    private legacyShapeId: number;
+    private legacyShapeId: string;
 
     constructor(readonly shapeManager: ShapeManager) {
     }
@@ -165,7 +167,7 @@ export class Line extends AbstractShape implements Shape {
     // toleration of 10 for mouse click
     selectToleration: number = 10;
 
-    constructor(readonly from: Point2D, readonly to: Point2D, specificId?: number) {
+    constructor(readonly from: Point2D, readonly to: Point2D, specificId?: string) {
         super(specificId);
     }
 
@@ -265,7 +267,7 @@ export class LineFactory extends AbstractFactory<Line> implements ShapeFactory {
 
 
 export class Circle extends AbstractShape implements Shape {
-    constructor(readonly center: Point2D, readonly radius: number, specificId?: number) {
+    constructor(readonly center: Point2D, readonly radius: number, specificId?: string) {
         super(specificId);
     }
 
@@ -349,7 +351,7 @@ export class CircleFactory extends AbstractFactory<Circle> implements ShapeFacto
 
 
 export class Rectangle extends AbstractShape implements Shape {
-    constructor(readonly from: Point2D, readonly to: Point2D, specificId?: number) {
+    constructor(readonly from: Point2D, readonly to: Point2D, specificId?: string) {
         super(specificId);
     }
 
@@ -452,7 +454,7 @@ export class RectangleFactory extends AbstractFactory<Rectangle> implements Shap
 
 
 export class Triangle extends AbstractShape implements Shape {
-    constructor(readonly p1: Point2D, readonly p2: Point2D, readonly p3: Point2D, specificId?: number) {
+    constructor(readonly p1: Point2D, readonly p2: Point2D, readonly p3: Point2D, specificId?: string) {
         super(specificId);
     }
 

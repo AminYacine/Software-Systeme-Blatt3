@@ -7,7 +7,7 @@ import {getClientId, sendCanvasEvent} from "./WebSocketService.js";
 import {Circle, Line, Rectangle, Triangle} from "./Shapes.js";
 
 export class Canvas implements ShapeManager {
-    get backGroundShapes(): Map<number, Shape> {
+    get backGroundShapes(): Map<string, Shape> {
         return this._backGroundShapes;
     }
 
@@ -20,9 +20,9 @@ export class Canvas implements ShapeManager {
     private readonly backgroundCanvasDomElement: HTMLCanvasElement;
 
     //holds the current created shape with corresponding id
-    private creationShapes: Map<number, Shape> = new Map();
+    private creationShapes: Map<string, Shape> = new Map();
     //holds every shape after being created
-    private _backGroundShapes: Map<number, Shape> = new Map();
+    private _backGroundShapes: Map<string, Shape> = new Map();
     //holds temporarily all the shapes that are clicked
     private shapesOnClickedPoint: Shape[] = [];
     //holds every selected shape
@@ -404,7 +404,7 @@ export class Canvas implements ShapeManager {
     handleEvent(event: CanvasEvent, userId: number) {
         const fromCurrentUser: boolean = userId === getClientId();
         let eventShape: Shape = event.shape;
-
+        console.log(eventShape.id)
         //only needs to generate new instance if event is not from current user
         if (!fromCurrentUser) {
             eventShape = Canvas.getSpecificShape(event);
@@ -425,7 +425,7 @@ export class Canvas implements ShapeManager {
             case EventTypes.MovedToBackground: {
                 // two maps are combined, with the first having the shape that should be at the start
                 // and the second being the shapes map holding the rest of the shapes.
-                const helperMap: Map<number, Shape> = new Map();
+                const helperMap: Map<string, Shape> = new Map();
                 helperMap.set(eventShape.id, eventShape);
                 this._backGroundShapes = new Map([...helperMap, ...this._backGroundShapes]);
                 break;
@@ -487,7 +487,7 @@ export class Canvas implements ShapeManager {
         }
     }
 
-    private isShapeBlocked(shapeId: number): boolean {
+    private isShapeBlocked(shapeId: string): boolean {
         for (let blockedShape of this.blockedShapes) {
             if (blockedShape.id === shapeId){
                 console.log("shape blocked", shapeId)
