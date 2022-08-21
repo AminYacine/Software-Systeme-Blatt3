@@ -59,7 +59,7 @@ export async function openConnection() {
             case WebSocketEvents.CanvasChangedEvent: {
                 const roomEvent = msg.value;
                 if (canvas) {
-                    canvas.handleEvent(roomEvent.canvasEvent);
+                    canvas.handleEvent(roomEvent.canvasEvent, roomEvent.clientId);
                 }
                 else {
                     console.log("canvas is null oder undefined", canvas);
@@ -132,7 +132,7 @@ function sendCreateCanvasEvent(canvasName) {
 function sendRegisterForCanvas(canvasId) {
     ws.send(JSON.stringify(new AbstractEvent(WebSocketEvents.RegisterForCanvas, new RegisterForCanvas(getClientId(), canvasId))));
 }
-function getClientId() {
+export function getClientId() {
     const clientId = sessionStorage.getItem("clientID");
     return Number(clientId);
 }
@@ -146,15 +146,13 @@ function setCurrentCanvasRoom(canvasId) {
 export function removeCurrentCanvasRoom() {
     sessionStorage.removeItem("canvasID");
 }
-function getCurrentCanvasRoom() {
+export function getCurrentCanvasRoom() {
     return sessionStorage.getItem("canvasID");
 }
 export function deregisterFromCanvas() {
     ws.send(JSON.stringify(new AbstractEvent(WebSocketEvents.DeregisterForCanvas, new DeregisterFromCanvasEvent(getClientId(), getCurrentCanvasRoom()))));
 }
 export function sendCanvasEvent(event) {
-    console.log("sent Event to backend ", event);
-    console.log("current room id", getCurrentCanvasRoom());
     ws.send(JSON.stringify(new AbstractEvent(WebSocketEvents.CanvasEvent, new RoomEvent(getClientId(), getCurrentCanvasRoom(), event))));
 }
 //# sourceMappingURL=WebSocketService.js.map

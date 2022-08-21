@@ -3,7 +3,7 @@ import {ToolArea} from "./ToolArea.js";
 import {MenuApi} from "./menuApi.js";
 import {Menu} from "./menu.js";
 import {CanvasEvent, EventTypes} from "./Event.js"
-import {sendCanvasEvent} from "./WebSocketService.js";
+import {getClientId, sendCanvasEvent} from "./WebSocketService.js";
 import {Circle, Line, Rectangle, Triangle} from "./Shapes.js";
 
 export class Canvas implements ShapeManager {
@@ -24,6 +24,7 @@ export class Canvas implements ShapeManager {
     private shapesOnClickedPoint: Shape[] = [];
     //holds every selected shape
     private selectedShapes: Shape[] = [];
+    private blockedShapes: Shape[] = [];
 
     private eventStream: CanvasEvent [] = [];
 
@@ -113,11 +114,17 @@ export class Canvas implements ShapeManager {
 
         // draw creation shape
         this.creationShapes.forEach((shape) => {
-            let isSelected = this.selectedShapes.includes(shape);
+            let isSelected = false;
+
+            for (let selectedShape of this.selectedShapes) {
+                if (shape.id === selectedShape.id) {
+                    isSelected = true;
+                    break;
+                }
+            }
             this.setCtxStandardState();
             shape.draw(this.ctx, isSelected, this.selectionColor);
         });
-
         return this;
     }
 
@@ -132,19 +139,25 @@ export class Canvas implements ShapeManager {
 
         //draw background shapes
         this.backGroundShapes.forEach((shape) => {
-            let isSelected = this.selectedShapes.includes(shape);
+            let isSelected = false;
+            for (let selectedShape of this.selectedShapes) {
+                if (shape.id === selectedShape.id) {
+                    isSelected = true;
+                    break;
+                }
+            }
             this.setCtxStandardState();
             shape.draw(this.ctx, isSelected, this.selectionColor);
         });
     }
 
-    addShape(shape: Shape, shapeFinished: boolean, shapeMoved: boolean) {
+    addShape(shape: Shape, shapeFinished: boolean, needsSelection: boolean) {
 
         //if the shape is finished, it will be added to the backgroundShapes and the creationCanvas will be reset
         if (shapeFinished) {
 
             //re-selects the moved shape
-            if (shapeMoved) {
+            if (needsSelection) {
                 this.selectedShapes.push(shape);
             }
 
@@ -274,7 +287,6 @@ export class Canvas implements ShapeManager {
         let menu = MenuApi.createMenu();
         let deleteItem = MenuApi.createItem("Delete", () => {
             this.selectedShapes.forEach((shape) => {
-                //todo add own clientId;
                 this.sendEvent(new CanvasEvent(EventTypes.ShapeRemoved, Canvas.getShapeType(shape), shape));
             });
         });
@@ -284,11 +296,9 @@ export class Canvas implements ShapeManager {
                 this.changeShapeOrder(true);
             }
         });
-
         const moveToBackGroundItem = MenuApi.createItem("To Background", () => {
             if (this.selectedShapes.length == 1) {
                 this.changeShapeOrder(false);
-                this.drawBackground();
             }
         });
 
@@ -332,16 +342,16 @@ export class Canvas implements ShapeManager {
      */
     private changeShapeOrder(toForeGround: boolean) {
         const shapeToMove: Shape = this.selectedShapes[0];
-        const idToMove = shapeToMove.id;
 
         // selected shape is deleted from the map so the position can be changed
         this.sendEvent(new CanvasEvent(EventTypes.ShapeRemoved, Canvas.getShapeType(shapeToMove), shapeToMove));
+        //added to selected shapes because after delete shape is removed from selected shapes
+        this.selectedShapes.push(shapeToMove);
 
         if (toForeGround) {
-            //add event moveToForeground
             this.sendEvent(new CanvasEvent(EventTypes.ShapeAdded, Canvas.getShapeType(shapeToMove), shapeToMove));
         } else {
-            //add event moveToBackground
+
             this.sendEvent(new CanvasEvent(EventTypes.MovedToBackground, Canvas.getShapeType(shapeToMove), shapeToMove));
 
         }
@@ -379,29 +389,35 @@ export class Canvas implements ShapeManager {
      * @param event
      */
     sendEvent(event: CanvasEvent) {
-        console.log("New Event:", event.type, event.eventId, event.shape);
-        this.eventStream.push(event.copy());
+        // this.eventStream.push(event.copy());
         sendCanvasEvent(event);
-        this.handleEvent(event);
+        this.handleEvent(event, getClientId());
     }
 
     /**
      * method that handles incoming events from the socket instance
      * @param event received CanvasEvent
+     * @param userId userId of the incoming event
      */
-    handleEvent(event: CanvasEvent) {
-        const eventShape: Shape = this.getSpecificShape(event);
-        console.log("canvas got event", event)
+    handleEvent(event: CanvasEvent, userId: number) {
+        const fromCurrentUser: boolean = userId === getClientId();
+        let eventShape: Shape = event.shape;
+
+        //only needs to generate new instance if event is not from current user
+        if (!fromCurrentUser) {
+            eventShape = Canvas.getSpecificShape(event);
+        }
+
         switch (event.type) {
 
             case EventTypes.ShapeRemoved: {
-                this.backGroundShapes.delete(event.shape.id);
-                this.selectedShapes = this.selectedShapes.filter(shape => shape.id !== eventShape.id)
+                this.backGroundShapes.delete(eventShape.id);
+                this.selectedShapes = this.selectedShapes.filter(shape => shape.id !== eventShape.id);
+                this.blockedShapes = this.blockedShapes.filter(shape => shape.id !== eventShape.id);
                 break;
             }
             case EventTypes.ShapeAdded: {
                 this.backGroundShapes.set(eventShape.id, eventShape);
-                console.log(this.backGroundShapes);
                 break;
             }
             case EventTypes.MovedToBackground: {
@@ -413,11 +429,29 @@ export class Canvas implements ShapeManager {
                 break;
             }
             case EventTypes.ShapeUnselected: {
-                this.selectedShapes = this.selectedShapes.filter(shape => shape.id !== eventShape.id);
+                const shape = this.backGroundShapes.get(eventShape.id);
+                if (shape !== undefined) {
+                    if (fromCurrentUser) {
+                        this.selectedShapes = this.selectedShapes.filter(shape => shape.id !== eventShape.id);
+                        console.log("unselected")
+                    } else {
+                        this.blockedShapes = this.blockedShapes.filter(shape => shape.id !== eventShape.id);
+                    }
+                }
                 break;
             }
             case EventTypes.ShapeSelected: {
-                this.selectedShapes.push(eventShape);
+                const shape = this.backGroundShapes.get(eventShape.id);
+                if (shape !== undefined) {
+                    //if the current user has selected a shape it will be pushed to the selected shapes, else it will be
+                    // blocked for selection
+                    if (fromCurrentUser) {
+                        this.selectedShapes.push(shape);
+                        console.log("selected")
+                    } else {
+                        this.blockedShapes.push(shape);
+                    }
+                }
                 break;
             }
         }
@@ -425,23 +459,28 @@ export class Canvas implements ShapeManager {
     }
 
 
-    private getSpecificShape(event: CanvasEvent) {
+    private static getSpecificShape(event: CanvasEvent) {
         switch (event.shapeType) {
             case "Line": {
-                const line: Line = JSON.parse(JSON.stringify(event.shape));
-                return  new Line(line.from, line.to, line.id);
+                // const line: Line = JSON.parse(JSON.stringify(event.shape));
+                // const newLine = new Line(
+                //     Point2D.newPoint(line.from),
+                //     Point2D.newPoint(line.to),
+                //     line.id
+                // );
+                // newLine.setOutlineColor(line.strokeColor);
+                // newLine.setFillColor(line.fillColor);
+                // return newLine;
+                return Line.fromJSON(JSON.stringify(event.shape));
             }
             case "Rectangle" : {
-                const rec: Rectangle = JSON.parse(JSON.stringify(event.shape));
-                return  new Rectangle(rec.from, rec.to, rec.id);
+                return Rectangle.fromJSON(JSON.stringify(event.shape));
             }
             case "Circle" : {
-                const circle: Circle = JSON.parse(JSON.stringify(event.shape));
-                return  new Circle(circle.center, circle.radius, circle.id);
+                return Circle.fromJSON(JSON.stringify(event.shape));
             }
             case "Triangle" : {
-                const triangle: Triangle = JSON.parse(JSON.stringify(event.shape));
-                return  new Triangle(triangle.p1, triangle.p2, triangle.p3, triangle.id);
+                return Triangle.fromJSON(JSON.stringify(event.shape));
             }
         }
     }
@@ -453,7 +492,7 @@ export class Canvas implements ShapeManager {
             return "Rectangle";
         } else if (shape instanceof Circle) {
             return "Circle";
-        } else if (shape instanceof Triangle){
+        } else if (shape instanceof Triangle) {
             return "Triangle";
         }
     }

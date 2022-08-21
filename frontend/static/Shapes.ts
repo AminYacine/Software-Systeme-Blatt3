@@ -4,6 +4,10 @@ export class Point2D {
     constructor(readonly x: number, readonly y: number) {
     }
 
+    static newPoint(point: Point2D) {
+        return new Point2D(point.x, point.y);
+    }
+
     add(point?: Point2D): Point2D {
         if (point) {
             return new Point2D(this.x + point.x, this.y + point.y);
@@ -176,6 +180,19 @@ export class Line extends AbstractShape implements Shape {
         return newLine;
     }
 
+    static fromJSON(serialized: string): Line {
+        const line: Line = JSON.parse(serialized);
+        const newLine = new Line(
+            Point2D.newPoint(line.from),
+            Point2D.newPoint(line.to),
+            line.id
+        )
+        if (line.strokeColor !== undefined) {
+            newLine.setOutlineColor(line.strokeColor);
+        }
+        return newLine;
+    }
+
     draw(ctx: CanvasRenderingContext2D, isSelected: boolean, selectionColor: string,) {
 
         ctx.beginPath();
@@ -263,6 +280,22 @@ export class Circle extends AbstractShape implements Shape {
         return newCircle;
     }
 
+    static fromJSON(serialized: string): Circle {
+        const circle: Circle = JSON.parse(serialized);
+        const newCircle = new Circle(
+            Point2D.newPoint(circle.center),
+            circle.radius,
+            circle.id
+        );
+        if (circle.strokeColor !== undefined) {
+            newCircle.setOutlineColor(circle.strokeColor);
+        }
+        if (circle.fillColor !== undefined) {
+            newCircle.setFillColor(circle.fillColor);
+        }
+        return newCircle;
+    }
+
     draw(ctx: CanvasRenderingContext2D, isSelected: boolean, selectionColor: string) {
 
         ctx.beginPath();
@@ -333,6 +366,22 @@ export class Rectangle extends AbstractShape implements Shape {
             newRectangle.setFillColor(this.fillColor);
         }
         return newRectangle;
+    }
+
+    static fromJSON(serialized: string): Rectangle {
+        const rec: Rectangle = JSON.parse(serialized);
+        const newRec = new Rectangle(
+            Point2D.newPoint(rec.from),
+            Point2D.newPoint(rec.to),
+            rec.id
+        );
+        if (rec.strokeColor !== undefined) {
+            newRec.setOutlineColor(rec.strokeColor);
+        }
+        if (rec.fillColor !== undefined) {
+            newRec.setFillColor(rec.fillColor);
+        }
+        return newRec;
     }
 
     draw(ctx: CanvasRenderingContext2D, isSelected: boolean, selectionColor: string) {
@@ -416,6 +465,23 @@ export class Triangle extends AbstractShape implements Shape {
         );
         newTriangle.setFillColor(this.fillColor);
         newTriangle.setOutlineColor((this.strokeColor));
+        return newTriangle;
+    }
+
+    static fromJSON(serialized: string): Triangle {
+        const triangle: Triangle = JSON.parse(serialized);
+        const newTriangle = new Triangle(
+            Point2D.newPoint(triangle.p1),
+            Point2D.newPoint(triangle.p2),
+            Point2D.newPoint(triangle.p3),
+            triangle.id
+        );
+        if (triangle.strokeColor !== undefined) {
+            newTriangle.setOutlineColor(triangle.strokeColor);
+        }
+        if (triangle.fillColor !== undefined) {
+            newTriangle.setFillColor(triangle.fillColor);
+        }
         return newTriangle;
     }
 

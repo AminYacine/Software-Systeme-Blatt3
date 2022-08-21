@@ -75,7 +75,7 @@ export async function openConnection() {
             case WebSocketEvents.CanvasChangedEvent: {
                 const roomEvent: RoomEvent = msg.value;
                 if (canvas) {
-                    canvas.handleEvent(roomEvent.canvasEvent);
+                    canvas.handleEvent(roomEvent.canvasEvent, roomEvent.clientId);
                 } else {
                     console.log("canvas is null oder undefined", canvas)
                 }
@@ -168,7 +168,7 @@ function sendRegisterForCanvas(canvasId: string) {
     ));
 }
 
-function getClientId(): number {
+export function getClientId(): number {
     const clientId = sessionStorage.getItem("clientID");
     return Number(clientId);
 }
@@ -186,7 +186,7 @@ export function removeCurrentCanvasRoom() {
     sessionStorage.removeItem("canvasID");
 }
 
-function getCurrentCanvasRoom(): string {
+export function getCurrentCanvasRoom(): string {
     return sessionStorage.getItem("canvasID");
 }
 
@@ -200,8 +200,6 @@ export function deregisterFromCanvas() {
 }
 
 export function sendCanvasEvent(event: CanvasEvent) {
-    console.log("sent Event to backend ", event);
-    console.log("current room id", getCurrentCanvasRoom())
     ws.send(JSON.stringify(
         new AbstractEvent(
             WebSocketEvents.CanvasEvent,
