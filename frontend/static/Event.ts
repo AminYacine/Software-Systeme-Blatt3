@@ -3,27 +3,24 @@ import {Shape} from "./types.js";
 
 export class CanvasEvent {
     type: EventTypes;
-    shapeType: string;
+    shapeType: ShapeTypes;
     shape: Shape;
-    // user: number;
     eventId: number;
     private static counter: number = 0;
-    color?: string;
 
-    constructor(type: EventTypes, shapeType: string, shape: Shape, color?: string) {
+    constructor(type: EventTypes, shapeType: ShapeTypes, shape: Shape) {
         this.type = type;
         this.shapeType = shapeType;
         this.shape = shape;
         // this.user = user;
         this.eventId = CanvasEvent.counter++;
-        this.color = color;
     }
 
     copy(): CanvasEvent {
         console.log("in copy event", this);
-       const copyEvent = new CanvasEvent( this.type, this.shapeType, this.shape.copyShape(), this.color);
-       copyEvent.eventId --;
-       return copyEvent;
+        const copyEvent = new CanvasEvent(this.type, this.shapeType, this.shape.copyShape());
+        copyEvent.eventId--;
+        return copyEvent;
     }
 
 }
@@ -34,4 +31,11 @@ export enum EventTypes {
     ShapeRemoved = "SHAPE_REMOVED",
     ShapeSelected = "SHAPE_SELECTED",
     ShapeUnselected = "SHAPE_UNSELECTED",
+}
+
+export enum ShapeTypes {
+    Line = "Line",
+    Rectangle = "Rectangle",
+    Circle = "Circle",
+    Triangle = "Triangle"
 }

@@ -1,15 +1,14 @@
 export class CanvasEvent {
-    constructor(type, shapeType, shape, color) {
+    constructor(type, shapeType, shape) {
         this.type = type;
         this.shapeType = shapeType;
         this.shape = shape;
         // this.user = user;
         this.eventId = CanvasEvent.counter++;
-        this.color = color;
     }
     copy() {
         console.log("in copy event", this);
-        const copyEvent = new CanvasEvent(this.type, this.shapeType, this.shape.copyShape(), this.color);
+        const copyEvent = new CanvasEvent(this.type, this.shapeType, this.shape.copyShape());
         copyEvent.eventId--;
         return copyEvent;
     }
@@ -23,4 +22,11 @@ export var EventTypes;
     EventTypes["ShapeSelected"] = "SHAPE_SELECTED";
     EventTypes["ShapeUnselected"] = "SHAPE_UNSELECTED";
 })(EventTypes || (EventTypes = {}));
+export var ShapeTypes;
+(function (ShapeTypes) {
+    ShapeTypes["Line"] = "Line";
+    ShapeTypes["Rectangle"] = "Rectangle";
+    ShapeTypes["Circle"] = "Circle";
+    ShapeTypes["Triangle"] = "Triangle";
+})(ShapeTypes || (ShapeTypes = {}));
 //# sourceMappingURL=Event.js.map

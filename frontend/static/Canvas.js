@@ -1,5 +1,5 @@
 import { MenuApi } from "./menuApi.js";
-import { CanvasEvent, EventTypes } from "./Event.js";
+import { CanvasEvent, EventTypes, ShapeTypes } from "./Event.js";
 import { getClientId, sendCanvasEvent } from "./WebSocketService.js";
 import { Circle, Line, Rectangle, Triangle } from "./Shapes.js";
 export class Canvas {
@@ -363,25 +363,16 @@ export class Canvas {
     }
     static getSpecificShape(event) {
         switch (event.shapeType) {
-            case "Line": {
-                // const line: Line = JSON.parse(JSON.stringify(event.shape));
-                // const newLine = new Line(
-                //     Point2D.newPoint(line.from),
-                //     Point2D.newPoint(line.to),
-                //     line.id
-                // );
-                // newLine.setOutlineColor(line.strokeColor);
-                // newLine.setFillColor(line.fillColor);
-                // return newLine;
+            case ShapeTypes.Line: {
                 return Line.fromJSON(JSON.stringify(event.shape));
             }
-            case "Rectangle": {
+            case ShapeTypes.Rectangle: {
                 return Rectangle.fromJSON(JSON.stringify(event.shape));
             }
-            case "Circle": {
+            case ShapeTypes.Circle: {
                 return Circle.fromJSON(JSON.stringify(event.shape));
             }
-            case "Triangle": {
+            case ShapeTypes.Triangle: {
                 return Triangle.fromJSON(JSON.stringify(event.shape));
             }
         }
@@ -397,16 +388,16 @@ export class Canvas {
     }
     static getShapeType(shape) {
         if (shape instanceof Line) {
-            return "Line";
+            return ShapeTypes.Line;
         }
         else if (shape instanceof Rectangle) {
-            return "Rectangle";
+            return ShapeTypes.Rectangle;
         }
         else if (shape instanceof Circle) {
-            return "Circle";
+            return ShapeTypes.Circle;
         }
         else if (shape instanceof Triangle) {
-            return "Triangle";
+            return ShapeTypes.Triangle;
         }
     }
 }

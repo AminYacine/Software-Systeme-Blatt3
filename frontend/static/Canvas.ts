@@ -2,7 +2,7 @@ import {Shape, ShapeManager} from "./types.js";
 import {ToolArea} from "./ToolArea.js";
 import {MenuApi} from "./menuApi.js";
 import {Menu} from "./menu.js";
-import {CanvasEvent, EventTypes} from "./Event.js"
+import {CanvasEvent, EventTypes, ShapeTypes} from "./Event.js"
 import {getClientId, sendCanvasEvent} from "./WebSocketService.js";
 import {Circle, Line, Rectangle, Triangle} from "./Shapes.js";
 
@@ -444,25 +444,16 @@ export class Canvas implements ShapeManager {
 
     private static getSpecificShape(event: CanvasEvent) {
         switch (event.shapeType) {
-            case "Line": {
-                // const line: Line = JSON.parse(JSON.stringify(event.shape));
-                // const newLine = new Line(
-                //     Point2D.newPoint(line.from),
-                //     Point2D.newPoint(line.to),
-                //     line.id
-                // );
-                // newLine.setOutlineColor(line.strokeColor);
-                // newLine.setFillColor(line.fillColor);
-                // return newLine;
+            case ShapeTypes.Line : {
                 return Line.fromJSON(JSON.stringify(event.shape));
             }
-            case "Rectangle" : {
+            case ShapeTypes.Rectangle : {
                 return Rectangle.fromJSON(JSON.stringify(event.shape));
             }
-            case "Circle" : {
+            case ShapeTypes.Circle : {
                 return Circle.fromJSON(JSON.stringify(event.shape));
             }
-            case "Triangle" : {
+            case ShapeTypes.Triangle : {
                 return Triangle.fromJSON(JSON.stringify(event.shape));
             }
         }
@@ -470,9 +461,9 @@ export class Canvas implements ShapeManager {
 
     private isShapeBlocked(shapeId: string): boolean {
         for (let blockedShape of this.blockedShapes) {
-            if (blockedShape.id === shapeId){
+            if (blockedShape.id === shapeId) {
                 console.log("shape blocked", shapeId)
-               return true;
+                return true;
             }
         }
         return false;
@@ -480,13 +471,13 @@ export class Canvas implements ShapeManager {
 
     static getShapeType(shape: Shape) {
         if (shape instanceof Line) {
-            return "Line";
+            return ShapeTypes.Line;
         } else if (shape instanceof Rectangle) {
-            return "Rectangle";
+            return ShapeTypes.Rectangle;
         } else if (shape instanceof Circle) {
-            return "Circle";
+            return ShapeTypes.Circle;
         } else if (shape instanceof Triangle) {
-            return "Triangle";
+            return ShapeTypes.Triangle;
         }
     }
 }

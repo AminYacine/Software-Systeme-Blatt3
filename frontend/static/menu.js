@@ -144,7 +144,6 @@ export class RadioOption {
                     } else {
                         shape.setOutlineColor(id);
                     }
-                    // canvas.sendEvent(new CanvasEvent(EventTypes.ShapeAdded, Canvas.getShapeType(shape), shape));
                     canvas.addShape(shape, true, false);
                 }
             });
