@@ -22,7 +22,6 @@ export class WsService {
 
     handleMessage(message: string, client: WebSocket.WebSocket) {
         const event: AbstractEvent = JSON.parse(message);
-        console.log("received message: ", event.type);
 
         switch (event.type) {
             case WebSocketEvents.CreateCanvas: {
@@ -48,7 +47,6 @@ export class WsService {
                 const registerEvent: RegisterForCanvas = event.value;
                 const canvasId = registerEvent.canvasId;
                 const clientId = registerEvent.clientId;
-                console.log("server: got register event", canvasId);
                 if (canvasId !== undefined && clientId !== undefined) {
                     const room = this.canvasRooms.get(canvasId);
 
@@ -59,7 +57,6 @@ export class WsService {
                                 WebSocketEvents.RegisteredForCanvas,
                                 new RegisteredForCanvasEvent(canvasId)
                             )));
-                            console.log("send registeredEvent");
                         }
                     }
                 }
@@ -72,7 +69,6 @@ export class WsService {
                     const room = this.canvasRooms.get(canvasId);
                     if (room) {
                         room.removeSession(deregisterEvent.clientId);
-                        console.log("removed from canvas");
                     }
                 }
                 break;
@@ -91,7 +87,6 @@ export class WsService {
                             WebSocketEvents.GetCanvasEventsResponse,
                             res
                         )));
-                        console.log("send selected shapes", res)
                     }
                 }
                 break;

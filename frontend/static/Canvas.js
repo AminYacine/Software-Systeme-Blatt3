@@ -308,7 +308,6 @@ export class Canvas {
     handleEvent(event, userId) {
         const fromCurrentUser = userId === getClientId();
         let eventShape = event.shape;
-        console.log(eventShape.id);
         //only needs to generate new instance if event is not from current user
         eventShape = Canvas.getSpecificShape(event);
         switch (event.type) {
@@ -335,7 +334,6 @@ export class Canvas {
                 if (shape !== undefined) {
                     if (fromCurrentUser) {
                         this.selectedShapes = this.selectedShapes.filter(shape => shape.id !== eventShape.id);
-                        console.log("unselected");
                     }
                     else {
                         this.blockedShapes = this.blockedShapes.filter(shape => shape.id !== eventShape.id);
@@ -350,7 +348,6 @@ export class Canvas {
                     // blocked for selection
                     if (fromCurrentUser) {
                         this.selectedShapes.push(shape);
-                        console.log("selected");
                     }
                     else {
                         this.blockedShapes.push(shape);
@@ -389,7 +386,6 @@ export class Canvas {
     isShapeBlocked(shapeId) {
         for (let blockedShape of this.blockedShapes) {
             if (blockedShape.id === shapeId) {
-                console.log("shape blocked", shapeId);
                 return true;
             }
         }

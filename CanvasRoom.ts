@@ -62,8 +62,6 @@ export class CanvasRoom {
                 break;
             }
         }
-        console.log("selectedShapes", this.selectedShapes);
-
     }
 
     removeEvent(id: string) {

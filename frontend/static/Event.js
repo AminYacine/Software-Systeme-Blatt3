@@ -8,7 +8,6 @@ export class CanvasEvent {
         this.color = color;
     }
     copy() {
-        console.log("in copy event", this);
         const copyEvent = new CanvasEvent(this.type, this.shapeType, this.shape.copyShape(), this.color);
         copyEvent.eventId--;
         return copyEvent;

@@ -38,7 +38,6 @@ export const router = async () => {
     if (view instanceof CanvasView) {
         await wss.openConnection();
         const isPathOk = checkCanvasPath();
-        console.log("isIdOk", isPathOk);
         if (isPathOk) {
             document.querySelector("#main-page").innerHTML = view.render();
             wss.sendGetCanvasEvents();
@@ -76,6 +75,4 @@ document.addEventListener("DOMContentLoaded", () => {
     router();
 });
 //to clear storage when window is closed
-window.addEventListener("load", () => {
-    console.log("onload")
-});
+window.addEventListener("load", () => {});

@@ -22,21 +22,14 @@ let canvas: Canvas;
 export async function openConnection() {
     ws = new WebSocket('ws://localhost:8080/web-socket');
 
-    ws.onopen = (event) => {
-        console.log("Open", event.type);
-    }
-    ws.onclose = (event) => {
-        console.log("Close", event);
-    }
+    ws.onopen = (event) => {}
+    ws.onclose = (event) => {}
 
     ws.onmessage = (message) => {
         let msg: AbstractEvent = JSON.parse(message.data)
-        console.log("event:", msg)
-
         switch (msg.type) {
             case WebSocketEvents.CanvasCreated: {
                 const createdEvent: CanvasCreatedEvent = msg.value;
-                console.log("received canvas created", createdEvent);
                 openRooms.push(new CanvasRoom(createdEvent.name, createdEvent.id));
                 if (createdEvent.clientId === getClientId()) {
                     setCurrentCanvasRoom(createdEvent.id);
@@ -59,7 +52,6 @@ export async function openConnection() {
                 const connectedEvent: ConnectedEvent = msg.value;
                 const currentClientID = getClientId();
                 if (!currentClientID) {
-                    console.log("noch keine id");
                     setClientId(connectedEvent.clientId);
                 }
                 ws.send(JSON.stringify(
@@ -76,8 +68,6 @@ export async function openConnection() {
                 const roomEvent: RoomEvent = msg.value;
                 if (canvas) {
                     canvas.handleEvent(roomEvent.canvasEvent, roomEvent.clientId);
-                } else {
-                    console.log("canvas is null oder undefined", canvas)
                 }
                 break;
             }
@@ -100,7 +90,6 @@ export async function openConnection() {
                                 canvas.blockedShapes.push(foundShape);
                             }
                         }
-                        console.log("set blocked shapes", canvas.blockedShapes)
                     }
                 }
                 break;
@@ -120,7 +109,6 @@ export function initOverviewUI() {
 
     button.addEventListener("click", (ev) => {
         if (name.value) {
-            console.log("input valid");
             sendCreateCanvasEvent(name.value);
         }
     });
@@ -128,7 +116,6 @@ export function initOverviewUI() {
 
 
 export function containsRoom(roomId: string): boolean {
-    console.log("in containsRoom")
     const foundRoom = openRooms.find(room => roomId === room.id);
     return foundRoom !== undefined;
 }
@@ -208,7 +195,6 @@ export function getClientId(): number {
 }
 
 function setClientId(clientId: number) {
-    console.log("clientId set:", clientId);
     sessionStorage.setItem("clientID", clientId.toString());
 }
 

@@ -13,7 +13,6 @@ export class WsService {
     }
     handleMessage(message, client) {
         const event = JSON.parse(message);
-        console.log("received message: ", event.type);
         switch (event.type) {
             case WebSocketEvents.CreateCanvas: {
                 const createCanvasEvent = event.value;
@@ -34,14 +33,12 @@ export class WsService {
                 const registerEvent = event.value;
                 const canvasId = registerEvent.canvasId;
                 const clientId = registerEvent.clientId;
-                console.log("server: got register event", canvasId);
                 if (canvasId !== undefined && clientId !== undefined) {
                     const room = this.canvasRooms.get(canvasId);
                     if (room) {
                         if (this.checkClientId(clientId)) {
                             room.addSession(clientId, client);
                             client.send(JSON.stringify(new AbstractEvent(WebSocketEvents.RegisteredForCanvas, new RegisteredForCanvasEvent(canvasId))));
-                            console.log("send registeredEvent");
                         }
                     }
                 }
@@ -54,7 +51,6 @@ export class WsService {
                     const room = this.canvasRooms.get(canvasId);
                     if (room) {
                         room.removeSession(deregisterEvent.clientId);
-                        console.log("removed from canvas");
                     }
                 }
                 break;
@@ -69,7 +65,6 @@ export class WsService {
                         const events = room.getCurrentEvents();
                         const res = new GetCanvasEventsResponse(canvasId, events, Object.fromEntries(room.getSelectedShapes()));
                         client.send(JSON.stringify(new AbstractEvent(WebSocketEvents.GetCanvasEventsResponse, res)));
-                        console.log("send selected shapes", res);
                     }
                 }
                 break;

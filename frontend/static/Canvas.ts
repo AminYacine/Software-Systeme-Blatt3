@@ -387,7 +387,6 @@ export class Canvas implements ShapeManager {
     handleEvent(event: CanvasEvent, userId: number) {
         const fromCurrentUser: boolean = userId === getClientId();
         let eventShape: Shape = event.shape;
-        console.log(eventShape.id)
         //only needs to generate new instance if event is not from current user
         eventShape = Canvas.getSpecificShape(event);
 
@@ -416,7 +415,6 @@ export class Canvas implements ShapeManager {
                 if (shape !== undefined) {
                     if (fromCurrentUser) {
                         this.selectedShapes = this.selectedShapes.filter(shape => shape.id !== eventShape.id);
-                        console.log("unselected")
                     } else {
                         this.blockedShapes = this.blockedShapes.filter(shape => shape.id !== eventShape.id);
                     }
@@ -430,7 +428,6 @@ export class Canvas implements ShapeManager {
                     // blocked for selection
                     if (fromCurrentUser) {
                         this.selectedShapes.push(shape);
-                        console.log("selected")
                     } else {
                         this.blockedShapes.push(shape);
                     }
@@ -471,7 +468,6 @@ export class Canvas implements ShapeManager {
     private isShapeBlocked(shapeId: string): boolean {
         for (let blockedShape of this.blockedShapes) {
             if (blockedShape.id === shapeId){
-                console.log("shape blocked", shapeId)
                return true;
             }
         }
