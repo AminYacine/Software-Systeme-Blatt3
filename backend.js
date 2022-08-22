@@ -1,4 +1,4 @@
-import { WsService } from "./services/WsService.js";
+import { WsService } from "./WsService.js";
 import { createRequire } from "module";
 import { fileURLToPath } from "url";
 const require = createRequire(import.meta.url);
