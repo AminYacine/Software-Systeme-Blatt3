@@ -1,7 +1,7 @@
 import * as wss from "./WebSocketService.js";
-import { Overview } from "./overview.js";
-import { CanvasView } from "./canvasView.js";
-import { NotFoundView } from "./notFoundView.js";
+import { Overview } from "./views/overview.js";
+import { CanvasView } from "./views/canvasView.js";
+import { NotFoundView } from "./views/notFoundView.js";
 //source: https://www.youtube.com/watch?v=6BozpmSjk-Y&ab_channel=dcode
 export const router = async () => {
     const routes = [

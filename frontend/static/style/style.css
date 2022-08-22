@@ -1,0 +1,94 @@
+.tools {
+    width: 100px;
+    float: left;
+    padding: 5px;
+}
+
+.tools li {
+    padding: 5px;
+    list-style: none;
+}
+
+.tools li:hover {
+    color: cornflowerblue;
+    cursor: pointer;
+}
+
+.tools li.marked {
+    background-color: cornflowerblue;
+    color: white;
+}
+
+
+#backgroundArea {
+    position: absolute;
+    border:1px solid #000000;
+    background-color: lightgrey;
+}
+
+#creationArea {
+    position: absolute;
+    border:1px solid #000000;
+}
+
+.helperDiv {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 999;
+    height: 100%;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.ulMenu {
+    position: absolute;
+    border-style: ridge;
+    padding: 0;
+    list-style-type: none;
+    background-color: aliceblue;
+}
+
+.ulMenu .menuItem {
+    margin: 5px;
+}
+
+.home-nav {
+    width: 80px;
+    position: fixed;
+    z-index: 1;
+    top: 20px;
+    left: 10px;
+    background: #eee;
+}
+
+.home-nav a:hover{
+    color: darkblue;
+}
+
+.home-nav a {
+    text-decoration: none;
+    font-size: 20px;
+    display: block;
+}
+
+#main-page {
+    margin-left: 90px;
+    padding: 35px 0 0  ;
+}
+
+.overview {
+    padding-top: 15px;
+}
+
+.input-area {
+    padding-bottom: 20px;
+}
+
+.room-list {
+}
+
+.clickable {
+    cursor: pointer;
+    padding-bottom: 10px;
+}

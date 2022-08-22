@@ -1,19 +1,19 @@
-import {WebSocketEvents} from "./WebSocketEvents.js";
-import {AbstractEvent} from "./AbstractEvent.js";
-import {RegisteredForCanvasEvent} from "./RegisteredForCanvasEvent.js";
+import {WebSocketEvents} from "./enums/WebSocketEvents.js";
+import {AbstractEventDTO} from "./dtos/AbstractEventDTO.js";
+import {RegisteredForCanvasEventDTO} from "./dtos/RegisteredForCanvasEventDTO.js";
 import {router} from "./index.js";
-import {CanvasRoom} from "./CanvasRoom.js";
-import {ConnectedEvent} from "./ConnectedEvent.js";
+import {CanvasRoom} from "./models/CanvasRoom.js";
+import {ConnectedEventDTO} from "./dtos/ConnectedEventDTO.js";
 import {CanvasCreatedEvent} from "../../ws-events/CanvasCreatedEvent.js";
-import {RegisterForCanvas} from "./RegisterForCanvas.js";
-import {CreateCanvasEvent} from "./CreateCanvasEvent.js";
-import {DeregisterFromCanvasEvent} from "./DeregisterFromCanvasEvent.js";
-import {CanvasEvent} from "./Event.js";
-import {RoomEvent} from "./RoomEvent.js";
-import {Canvas} from "./Canvas.js";
-import {init} from "./init.js";
-import {GetCanvasEventsResponse} from "./GetCanvasEventsResponse.js";
-import {GetCanvasEvents} from "./GetCanvasEvents.js";
+import {RegisterForCanvasEventDTO} from "./dtos/RegisterForCanvasEventDTO.js";
+import {CreateCanvasEventDTO} from "./dtos/CreateCanvasEventDTO.js";
+import {DeregisterFromCanvasEventDTO} from "./dtos/DeregisterFromCanvasEventDTO.js";
+import {CanvasEvent} from "./models/CanvasEvent.js";
+import {RoomEvent} from "./models/RoomEvent.js";
+import {Canvas} from "./canvas/Canvas.js";
+import {initCanvas} from "./canvas/initCanvas.js";
+import {GetCanvasEventsResponseDTO} from "./dtos/GetCanvasEventsResponseDTO.js";
+import {GetCanvasEventsDTO} from "./dtos/GetCanvasEventsDTO.js";
 
 let ws: WebSocket;
 let openRooms: CanvasRoom [] = [];
@@ -30,7 +30,7 @@ export async function openConnection() {
     }
 
     ws.onmessage = (message) => {
-        let msg: AbstractEvent = JSON.parse(message.data)
+        let msg: AbstractEventDTO = JSON.parse(message.data)
         console.log("event:", msg)
 
         switch (msg.type) {
@@ -48,7 +48,7 @@ export async function openConnection() {
                 break;
             }
             case WebSocketEvents.RegisteredForCanvas: {
-                const registeredEvent: RegisteredForCanvasEvent = msg.value;
+                const registeredEvent: RegisteredForCanvasEventDTO = msg.value;
                 const canvasId = registeredEvent.canvasId;
                 setCurrentCanvasRoom(canvasId);
                 window.history.pushState("", "", `/canvas/${canvasId}`);
@@ -56,14 +56,14 @@ export async function openConnection() {
                 break;
             }
             case WebSocketEvents.CreatedClientId: {
-                const connectedEvent: ConnectedEvent = msg.value;
+                const connectedEvent: ConnectedEventDTO = msg.value;
                 const currentClientID = getClientId();
                 if (!currentClientID) {
                     console.log("noch keine id");
                     setClientId(connectedEvent.clientId);
                 }
                 ws.send(JSON.stringify(
-                    new AbstractEvent(
+                    new AbstractEventDTO(
                         WebSocketEvents.SessionID,
                         getClientId()
                     )
@@ -82,7 +82,7 @@ export async function openConnection() {
                 break;
             }
             case WebSocketEvents.GetCanvasEventsResponse: {
-                const roomEvents: GetCanvasEventsResponse = msg.value;
+                const roomEvents: GetCanvasEventsResponseDTO = msg.value;
                 const blockedShapesObject = roomEvents.blockedShapes;
                 let  blockedShapes = new Map<string,number>();
                 for (var shapeId in blockedShapesObject) {
@@ -111,7 +111,7 @@ export async function openConnection() {
 }
 
 export function initCanvasView() {
-    canvas = init();
+    canvas = initCanvas();
 }
 
 export function initOverviewUI() {
@@ -173,28 +173,27 @@ function updateRoomListInHtml() {
 
 function sendCreateCanvasEvent(canvasName: string) {
     ws.send(JSON.stringify(
-        new AbstractEvent(
+        new AbstractEventDTO(
             WebSocketEvents.CreateCanvas,
-            new CreateCanvasEvent(canvasName, getClientId())
+            new CreateCanvasEventDTO(canvasName, getClientId())
         )
     ));
 }
 
 function sendRegisterForCanvasEvent(canvasId: string) {
     ws.send(JSON.stringify(
-        new AbstractEvent(
+        new AbstractEventDTO(
             WebSocketEvents.RegisterForCanvas,
-            new RegisterForCanvas(getClientId(), canvasId)
+            new RegisterForCanvasEventDTO(getClientId(), canvasId)
         )
     ));
 }
 
 export function sendGetCanvasEvents() {
-
     ws.send(JSON.stringify(
-        new AbstractEvent(
+        new AbstractEventDTO(
             WebSocketEvents.GetCanvasEvents,
-            new GetCanvasEvents(
+            new GetCanvasEventsDTO(
                 getCurrentCanvasRoom(),
                 getClientId()
             )
@@ -226,16 +225,16 @@ export function getCurrentCanvasRoom(): string {
 
 export function deregisterFromCanvas() {
     ws.send(JSON.stringify(
-        new AbstractEvent(
+        new AbstractEventDTO(
             WebSocketEvents.DeregisterForCanvas,
-            new DeregisterFromCanvasEvent(getClientId(), getCurrentCanvasRoom())
+            new DeregisterFromCanvasEventDTO(getClientId(), getCurrentCanvasRoom())
         )
     ));
 }
 
 export function sendCanvasEvent(event: CanvasEvent) {
     ws.send(JSON.stringify(
-        new AbstractEvent(
+        new AbstractEventDTO(
             WebSocketEvents.CanvasEvent,
             new RoomEvent(getClientId(), getCurrentCanvasRoom(), event)
         )

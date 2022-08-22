@@ -1,4 +1,7 @@
-<body>
+export class Overview {
+    render() {
+        return `
+        <body>
 <div class="overview">
     <div class="input-area">
         <input type="text" id="roomName" name="roomName" placeholder="Enter new room name">
@@ -9,3 +12,7 @@
     </div>
 </div>
 </body>
+        `;
+    }
+}
+//# sourceMappingURL=overview.js.map

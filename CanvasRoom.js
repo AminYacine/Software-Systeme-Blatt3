@@ -1,5 +1,5 @@
 import { v4 } from "uuid";
-import { EventTypes } from "./frontend/static/Event.js";
+import { EventTypes } from "./frontend/static/enums/EventTypes.js";
 export class CanvasRoom {
     constructor(name) {
         this.name = name;

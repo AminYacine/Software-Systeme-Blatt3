@@ -3,25 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <title>Home</title>
-    <link rel="stylesheet" href="./static/style.css" type="text/css"/>
+    <link rel="stylesheet" href="static/style/style.css" type="text/css"/>
 </head>
 <body>
 <script src="./static/index.js" type="module"></script>
-<script src="./static/types.js" type="module"></script>
-<script src="./static/Shapes.js" type="module"></script>
-<script src="./static/ToolArea.js" type="module"></script>
-<script src="./static/Canvas.js" type="module"></script>
-<script src="./static/Event.js" type="module"></script>
-<script src="./static/init.js" type="module"></script>
-<script src="./static/menu.js" type="module"></script>
-<script src="./static/menuApi.js" type="module"></script>
+<script src="static/canvas/types.js" type="module"></script>
+<script src="static/models/Shapes.js" type="module"></script>
+<script src="static/models/ToolArea.js" type="module"></script>
+<script src="static/canvas/Canvas.js" type="module"></script>
+<script src="static/models/CanvasEvent.js" type="module"></script>
+<script src="static/canvas/initCanvas.js" type="module"></script>
+<script src="static/canvas/menu.js" type="module"></script>
+<script src="static/canvas/menuApi.js" type="module"></script>
 <script src="./static/WebSocketService.js" type="module"></script>
 
 
-<div>
-    <nav id="main-nav">
-        <a href="/"  data-link>Home</a>
-    </nav>
+<div id="main-div">
+    <div class="home-nav">
+        <a href="/" data-link>
+            Home
+        </a>
+    </div>
     <div id="main-page"></div>
 </div>
 </body>

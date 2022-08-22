@@ -1,10 +1,10 @@
-import { AbstractEvent } from "../frontend/static/AbstractEvent.js";
-import { RegisteredForCanvasEvent } from "../frontend/static/RegisteredForCanvasEvent.js";
+import { AbstractEventDTO } from "../frontend/static/dtos/AbstractEventDTO.js";
+import { RegisteredForCanvasEventDTO } from "../frontend/static/dtos/RegisteredForCanvasEventDTO.js";
 import { CanvasCreatedEvent } from "../ws-events/CanvasCreatedEvent.js";
-import { WebSocketEvents } from "../frontend/static/WebSocketEvents.js";
+import { WebSocketEvents } from "../frontend/static/enums/WebSocketEvents.js";
 import { CanvasRoom } from "../CanvasRoom.js";
 import { ConnectedEvent } from "../ConnectedEvent.js";
-import { GetCanvasEventsResponse } from "../frontend/static/GetCanvasEventsResponse.js";
+import { GetCanvasEventsResponseDTO } from "../frontend/static/dtos/GetCanvasEventsResponseDTO.js";
 export class WsService {
     constructor() {
         this.clientIdCounter = 1;
@@ -26,7 +26,7 @@ export class WsService {
                     const canvas = new CanvasRoom(canvasName);
                     canvas.addSession(clientId, client);
                     this.canvasRooms.set(canvas.id, canvas);
-                    this.broadCastEvent(Array.from(this.clients.values()), new AbstractEvent(WebSocketEvents.CanvasCreated, new CanvasCreatedEvent(canvas.id, canvasName, clientId)));
+                    this.broadCastEvent(Array.from(this.clients.values()), new AbstractEventDTO(WebSocketEvents.CanvasCreated, new CanvasCreatedEvent(canvas.id, canvasName, clientId)));
                 }
                 break;
             }
@@ -40,7 +40,7 @@ export class WsService {
                     if (room) {
                         if (this.checkClientId(clientId)) {
                             room.addSession(clientId, client);
-                            client.send(JSON.stringify(new AbstractEvent(WebSocketEvents.RegisteredForCanvas, new RegisteredForCanvasEvent(canvasId))));
+                            client.send(JSON.stringify(new AbstractEventDTO(WebSocketEvents.RegisteredForCanvas, new RegisteredForCanvasEventDTO(canvasId))));
                             console.log("send registeredEvent");
                         }
                     }
@@ -67,8 +67,8 @@ export class WsService {
                 if (room) {
                     if (this.checkClientId(clientId)) {
                         const events = room.getCurrentEvents();
-                        const res = new GetCanvasEventsResponse(canvasId, events, Object.fromEntries(room.getSelectedShapes()));
-                        client.send(JSON.stringify(new AbstractEvent(WebSocketEvents.GetCanvasEventsResponse, res)));
+                        const res = new GetCanvasEventsResponseDTO(canvasId, events, Object.fromEntries(room.getSelectedShapes()));
+                        client.send(JSON.stringify(new AbstractEventDTO(WebSocketEvents.GetCanvasEventsResponse, res)));
                         console.log("send selected shapes", res);
                     }
                 }
@@ -87,14 +87,14 @@ export class WsService {
                 if (room !== undefined) {
                     room.addEvent(roomEvent);
                     const roomClients = room.getClientsExcept(clientId);
-                    this.broadCastEvent(roomClients, new AbstractEvent(WebSocketEvents.CanvasChangedEvent, roomEvent));
+                    this.broadCastEvent(roomClients, new AbstractEventDTO(WebSocketEvents.CanvasChangedEvent, roomEvent));
                 }
             }
         }
     }
     handleConnection(client) {
         const id = this.getNewClientID();
-        client.send(JSON.stringify(new AbstractEvent(WebSocketEvents.CreatedClientId, new ConnectedEvent(id, Array.from(this.canvasRooms.values())))));
+        client.send(JSON.stringify(new AbstractEventDTO(WebSocketEvents.CreatedClientId, new ConnectedEvent(id, Array.from(this.canvasRooms.values())))));
     }
     broadCastEvent(clients, event) {
         clients.forEach(client => {

@@ -1,8 +1,8 @@
 import * as WebSocket from "ws";
 import {v4} from "uuid";
-import { EventTypes} from "./frontend/static/Event.js";
-import {Shape} from "./frontend/static/types.js";
-import {RoomEvent} from "./frontend/static/RoomEvent.js";
+import { EventTypes} from "./frontend/static/enums/EventTypes.js";
+import {Shape} from "./frontend/static/canvas/types.js";
+import {RoomEvent} from "./frontend/static/models/RoomEvent.js";
 
 export class CanvasRoom {
     id: string;
