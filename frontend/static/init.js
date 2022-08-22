@@ -5,7 +5,6 @@ export function init() {
     const creationCanvasDomElm = document.getElementById("creationArea");
     const backGroundCanvasDomElm = document.getElementById("backgroundArea");
     const menu = document.getElementsByClassName("tools");
-    const texInput = document.getElementById("eventInput");
     // Problem here: Factories needs a way to create new Shapes, so they
     // have to call a method of the canvas.
     // The canvas on the other side wants to call the event methods
@@ -44,6 +43,6 @@ export function init() {
         new SelectionFactory(sm),
     ];
     const toolArea = new ToolArea(shapesSelector, menu[0]);
-    return canvas = new Canvas(creationCanvasDomElm, backGroundCanvasDomElm, toolArea, texInput);
+    return canvas = new Canvas(creationCanvasDomElm, backGroundCanvasDomElm, toolArea);
 }
 //# sourceMappingURL=init.js.map

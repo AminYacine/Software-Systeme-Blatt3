@@ -8,8 +8,6 @@ export class CanvasView {
         die entsprechenden Figuren zeichnen. Typischerweise, indem
         Sie die Maus drücken, dann mit gedrückter Maustaste die
         Form bestimmen, und dann anschließend die Maustaste loslassen.
-        <label for="eventInput"></label><input id="eventInput" type="text" placeholder="Type new event">
-            <button id="eventButton">Add event</button>
         </p>
 
         <ul class="tools"></ul>

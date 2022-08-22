@@ -29,8 +29,6 @@ export class Canvas implements ShapeManager {
     private selectedShapes: Shape[] = [];
     blockedShapes: Shape[] = [];
 
-    private eventStream: CanvasEvent [] = [];
-
     private readonly width: number;
     private readonly height: number;
     private readonly selectionColor = 'rgb(255,0,0)';
@@ -39,7 +37,7 @@ export class Canvas implements ShapeManager {
     private readonly standardOutlineColor: string = "black";
 
 
-    constructor(creationCanvasDomElement: HTMLCanvasElement, backgroundCanvasDomElement: HTMLCanvasElement, toolArea: ToolArea, private eventInput: HTMLInputElement) {
+    constructor(creationCanvasDomElement: HTMLCanvasElement, backgroundCanvasDomElement: HTMLCanvasElement, toolArea: ToolArea) {
         this.backgroundCanvasDomElement = backgroundCanvasDomElement;
         this.creationCanvasDomElement = creationCanvasDomElement;
 
@@ -90,20 +88,6 @@ export class Canvas implements ShapeManager {
                 }
             }
         }
-
-        const eventButton = document.getElementById("eventButton");
-        eventButton.addEventListener("click", () => {
-            this.handleNewEvent(eventInput.value)
-        });
-    }
-
-    handleNewEvent(eventId: string) {
-        const myEvent = this.eventStream.find(event => {
-            return event.eventId === Number(eventId)
-        });
-        console.log("Found event:", myEvent)
-        this.sendEvent(myEvent);
-
     }
 
     /**
@@ -391,7 +375,6 @@ export class Canvas implements ShapeManager {
      * @param event
      */
     sendEvent(event: CanvasEvent) {
-        // this.eventStream.push(event.copy());
         sendCanvasEvent(event);
         this.handleEvent(event, getClientId());
     }

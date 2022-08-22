@@ -3,8 +3,7 @@ import { CanvasEvent, EventTypes } from "./Event.js";
 import { getClientId, sendCanvasEvent } from "./WebSocketService.js";
 import { Circle, Line, Rectangle, Triangle } from "./Shapes.js";
 export class Canvas {
-    constructor(creationCanvasDomElement, backgroundCanvasDomElement, toolArea, eventInput) {
-        this.eventInput = eventInput;
+    constructor(creationCanvasDomElement, backgroundCanvasDomElement, toolArea) {
         //holds the current created shape with corresponding id
         this.creationShapes = new Map();
         //holds every shape after being created
@@ -14,7 +13,6 @@ export class Canvas {
         //holds every selected shape
         this.selectedShapes = [];
         this.blockedShapes = [];
-        this.eventStream = [];
         this.selectionColor = 'rgb(255,0,0)';
         this.standardFillColor = "transparent";
         this.standardOutlineColor = "black";
@@ -55,20 +53,9 @@ export class Canvas {
                 }
             };
         }
-        const eventButton = document.getElementById("eventButton");
-        eventButton.addEventListener("click", () => {
-            this.handleNewEvent(eventInput.value);
-        });
     }
     get backGroundShapes() {
         return this._backGroundShapes;
-    }
-    handleNewEvent(eventId) {
-        const myEvent = this.eventStream.find(event => {
-            return event.eventId === Number(eventId);
-        });
-        console.log("Found event:", myEvent);
-        this.sendEvent(myEvent);
     }
     /**
      * method to draw in the creationCanvas
@@ -310,7 +297,6 @@ export class Canvas {
      * @param event
      */
     sendEvent(event) {
-        // this.eventStream.push(event.copy());
         sendCanvasEvent(event);
         this.handleEvent(event, getClientId());
     }
