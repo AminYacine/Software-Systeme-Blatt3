@@ -38,8 +38,8 @@ export async function openConnection() {
                 const createdEvent: CanvasCreatedEvent = msg.value;
                 console.log("received canvas created", createdEvent);
                 openRooms.push(new CanvasRoom(createdEvent.name, createdEvent.id));
-                setCurrentCanvasRoom(createdEvent.id);
                 if (createdEvent.clientId === getClientId()) {
+                    setCurrentCanvasRoom(createdEvent.id);
                     window.history.pushState("", "", `/canvas/${createdEvent.id}`);
                     router();
                 } else {
