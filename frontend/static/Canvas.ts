@@ -389,9 +389,7 @@ export class Canvas implements ShapeManager {
         let eventShape: Shape = event.shape;
         console.log(eventShape.id)
         //only needs to generate new instance if event is not from current user
-        if (!fromCurrentUser) {
-            eventShape = Canvas.getSpecificShape(event);
-        }
+        eventShape = Canvas.getSpecificShape(event);
 
         switch (event.type) {
 
