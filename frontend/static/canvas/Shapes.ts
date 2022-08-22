@@ -1,4 +1,4 @@
-import {Shape, ShapeFactory, ShapeManager} from "../canvas/types.js";
+import {Shape, ShapeFactory, ShapeManager} from "./types.js";
 import {getClientId} from "../WebSocketService.js";
 
 export class Point2D {
@@ -207,8 +207,6 @@ export class Line extends AbstractShape implements Shape {
             ctx.fillStyle = selectionColor;
             ctx.fillRect(this.from.x - 3, this.from.y - 3, 6, 6);
             ctx.fillRect(this.to.x - 3, this.to.y - 3, 6, 6)
-
-
         }
     }
 

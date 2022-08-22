@@ -3,7 +3,7 @@ import { CanvasEvent } from "../models/CanvasEvent.js";
 import { EventTypes } from "../enums/EventTypes.js";
 import { ShapeTypes } from "../enums/ShapeTypes.js";
 import { getClientId, sendCanvasEvent } from "../WebSocketService.js";
-import { Circle, Line, Rectangle, Triangle } from "../models/Shapes.js";
+import { Circle, Line, Rectangle, Triangle } from "./Shapes.js";
 export class Canvas {
     constructor(creationCanvasDomElement, backgroundCanvasDomElement, toolArea) {
         //holds the current created shape with corresponding id
@@ -15,7 +15,8 @@ export class Canvas {
         //holds every selected shape
         this.selectedShapes = [];
         this.blockedShapes = [];
-        this.selectionColor = 'rgb(255,0,0)';
+        this.selectionColor = `rgb(0,0,255)`;
+        this.blockedColor = 'rgb(255,0,0)';
         this.standardFillColor = "transparent";
         this.standardOutlineColor = "black";
         this.backgroundCanvasDomElement = backgroundCanvasDomElement;
@@ -85,21 +86,34 @@ export class Canvas {
      * method to draw in the backgroundCanvas
      */
     drawBackground() {
+        let markingColor;
         this.setContextToBackgroundCanvas();
         this.ctx.beginPath();
         //used to reset the canvas
         this.ctx.clearRect(0, 0, this.width, this.height);
-        //draw background shapes
+        //checks if shape is selected and sets color appropriately
         this._backGroundShapes.forEach((shape) => {
-            let isSelected = false;
+            let isSelectedOrBlocked = false;
             for (let selectedShape of this.selectedShapes) {
                 if (shape.id === selectedShape.id) {
-                    isSelected = true;
+                    isSelectedOrBlocked = true;
+                    markingColor = this.selectionColor;
                     break;
                 }
             }
+            //checks if shape is blocked and sets color appropriately
+            if (!isSelectedOrBlocked) {
+                for (let blockedShape of this.blockedShapes) {
+                    if (shape.id == blockedShape.id) {
+                        isSelectedOrBlocked = true;
+                        markingColor = this.blockedColor;
+                        break;
+                    }
+                }
+            }
+            //draw background shapes
             this.setCtxStandardState();
-            shape.draw(this.ctx, isSelected, this.selectionColor);
+            shape.draw(this.ctx, isSelectedOrBlocked, markingColor);
         });
     }
     addShape(shape, shapeFinished, needsSelection) {

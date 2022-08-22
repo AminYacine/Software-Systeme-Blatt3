@@ -1,5 +1,5 @@
 import {Shape, ShapeFactory, ShapeManager} from "./types.js";
-import {CircleFactory, LineFactory, RectangleFactory, SelectionFactory, TriangleFactory} from "../models/Shapes.js";
+import {CircleFactory, LineFactory, RectangleFactory, SelectionFactory, TriangleFactory} from "./Shapes.js";
 import {ToolArea} from "../models/ToolArea.js";
 import {Canvas} from "./Canvas.js";
 export function initCanvas(): Canvas {

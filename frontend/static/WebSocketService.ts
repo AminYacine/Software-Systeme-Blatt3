@@ -100,6 +100,8 @@ export async function openConnection() {
                                 canvas.blockedShapes.push(foundShape);
                             }
                         }
+                        //Draw shapes to update all blocked shapes
+                        canvas.drawBackground();
                         console.log("set blocked shapes", canvas.blockedShapes)
                     }
                 }

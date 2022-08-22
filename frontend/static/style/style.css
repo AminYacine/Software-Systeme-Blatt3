@@ -74,7 +74,7 @@
 
 #main-page {
     margin-left: 90px;
-    padding: 35px 0 0  ;
+    /*padding: 35px 0 0  ;*/
 }
 
 .overview {
@@ -91,4 +91,17 @@
 .clickable {
     cursor: pointer;
     padding-bottom: 10px;
+}
+
+#selection-color {
+    background: blue;
+    color: blue;
+    width: fit-content;
+    margin-right: 20px;
+}
+
+#blocked-color {
+    background: red;
+    color: red;
+    width: fit-content;
 }

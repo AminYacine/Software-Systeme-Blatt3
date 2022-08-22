@@ -1,4 +1,4 @@
-import {Point2D} from "../models/Shapes.js";
+import {Point2D} from "./Shapes.js";
 
 export interface Shape {
     readonly id: string;

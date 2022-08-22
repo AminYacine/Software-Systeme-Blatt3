@@ -6,7 +6,7 @@ import {CanvasEvent} from "../models/CanvasEvent.js";
 import { EventTypes} from "../enums/EventTypes.js";
 import { ShapeTypes} from "../enums/ShapeTypes.js";
 import {getClientId, sendCanvasEvent} from "../WebSocketService.js";
-import {Circle, Line, Rectangle, Triangle} from "../models/Shapes.js";
+import {Circle, Line, Rectangle, Triangle} from "./Shapes.js";
 
 export class Canvas implements ShapeManager {
     get backGroundShapes(): Map<string, Shape> {
@@ -33,7 +33,8 @@ export class Canvas implements ShapeManager {
 
     private readonly width: number;
     private readonly height: number;
-    private readonly selectionColor = 'rgb(255,0,0)';
+    private readonly selectionColor = `rgb(0,0,255)`;
+    private readonly blockedColor = 'rgb(255,0,0)';
 
     private readonly standardFillColor: string = "transparent";
     private readonly standardOutlineColor: string = "black";
@@ -121,22 +122,36 @@ export class Canvas implements ShapeManager {
      * method to draw in the backgroundCanvas
      */
     drawBackground() {
+        let markingColor;
         this.setContextToBackgroundCanvas();
         this.ctx.beginPath();
         //used to reset the canvas
         this.ctx.clearRect(0, 0, this.width, this.height);
 
-        //draw background shapes
+        //checks if shape is selected and sets color appropriately
         this._backGroundShapes.forEach((shape) => {
-            let isSelected = false;
+            let isSelectedOrBlocked = false;
+
             for (let selectedShape of this.selectedShapes) {
                 if (shape.id === selectedShape.id) {
-                    isSelected = true;
+                    isSelectedOrBlocked = true;
+                    markingColor = this.selectionColor;
                     break;
                 }
             }
+            //checks if shape is blocked and sets color appropriately
+            if (!isSelectedOrBlocked) {
+                for (let blockedShape of this.blockedShapes) {
+                    if (shape.id == blockedShape.id) {
+                        isSelectedOrBlocked = true;
+                        markingColor = this.blockedColor;
+                        break;
+                    }
+                }
+            }
+            //draw background shapes
             this.setCtxStandardState();
-            shape.draw(this.ctx, isSelected, this.selectionColor);
+            shape.draw(this.ctx, isSelectedOrBlocked, markingColor);
         });
     }
 
@@ -340,7 +355,6 @@ export class Canvas implements ShapeManager {
         if (toForeGround) {
             this.sendEvent(new CanvasEvent(EventTypes.ShapeAdded, Canvas.getShapeType(shapeToMove), shapeToMove));
         } else {
-
             this.sendEvent(new CanvasEvent(EventTypes.MovedToBackground, Canvas.getShapeType(shapeToMove), shapeToMove));
         }
     }
