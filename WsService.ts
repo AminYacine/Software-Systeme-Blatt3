@@ -200,7 +200,7 @@ export class WsService {
                             room.getClientsExcept(clientId),
                             WebSocketEvents.CanvasChangedEvent,
                             new RoomEvent(
-                                clientId,room.id,
+                                clientId, room.id,
                                 new CanvasEvent(
                                     EventTypes.ShapeUnselected,
                                     shape.type,
@@ -232,6 +232,9 @@ export class WsService {
 
     private handleSessionIdEvent(client: WebSocket, id: number) {
         this.clients.set(id, client);
+        this.canvasRooms.forEach(room => {
+            room.updateClientSession(id, client);
+        });
     }
 
     private handleCanvasEvent(roomEvent: RoomEvent) {

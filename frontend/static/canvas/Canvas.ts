@@ -29,7 +29,7 @@ export class Canvas implements ShapeManager {
     //holds temporarily all the shapes that are clicked
     private shapesOnClickedPoint: Shape[] = [];
     //holds every selected shape
-    private selectedShapes: Shape[] = [];
+    selectedShapes: Shape[] = [];
     blockedShapes: Shape[] = [];
 
     private readonly width: number;

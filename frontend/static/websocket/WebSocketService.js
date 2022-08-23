@@ -116,9 +116,17 @@ function handleGetCanvasEventsResponse(roomEvents) {
         }
         if (blockedShapes.size > 0) {
             for (let shapeId of blockedShapes.keys()) {
+                // when the user who blocked the shape is not the current user
+                // then the shape is added to the blocked shape list. Otherwise, the shape
+                // is added to the selected list
                 const foundShape = canvas.backGroundShapes.get(shapeId);
                 if (foundShape) {
-                    canvas.blockedShapes.push(foundShape);
+                    if (blockedShapes.get(shapeId) !== getClientId()) {
+                        canvas.blockedShapes.push(foundShape);
+                    }
+                    else {
+                        canvas.selectedShapes.push(foundShape);
+                    }
                 }
             }
             //Draw shapes to update all blocked shapes in ui

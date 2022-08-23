@@ -2,7 +2,10 @@ import * as wss from "./websocket/WebSocketService.js";
 import {Overview} from "./views/overview.js";
 import {CanvasView} from "./views/canvasView.js";
 import {NotFoundView} from "./views/notFoundView.js";
-import {sendDeregisterFromCanvasEvent, sendGetCanvasEvents} from "./websocket/WebSocketHelper.js";
+import {
+    sendDeregisterFromCanvasEvent,
+    sendGetCanvasEvents,
+} from "./websocket/WebSocketHelper.js";
 import {getCurrentCanvasRoom} from "./websocket/WebSocketService.js";
 
 /**

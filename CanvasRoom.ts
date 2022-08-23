@@ -92,4 +92,11 @@ export class CanvasRoom {
     getSelectedShapes() {
         return this._selectedShapes;
     }
+
+    updateClientSession(clientId: number, session: WebSocket) {
+        if (this.clients.has(clientId)) {
+            console.log("client updated", clientId)
+            this.addSession(clientId, session);
+        }
+    }
 }

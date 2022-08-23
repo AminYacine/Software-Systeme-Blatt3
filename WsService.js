@@ -179,6 +179,9 @@ export class WsService {
     }
     handleSessionIdEvent(client, id) {
         this.clients.set(id, client);
+        this.canvasRooms.forEach(room => {
+            room.updateClientSession(id, client);
+        });
     }
     handleCanvasEvent(roomEvent) {
         const roomId = roomEvent.roomId;
