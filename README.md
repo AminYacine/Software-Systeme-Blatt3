@@ -33,47 +33,56 @@ Verwendete Pakete:
 
 <!-- GETTING STARTED -->
 ## Getting Started
-Um die Applikation zu starte 
-This is an example of how you may give instructions on setting up your project locally.
-To get a local copy up and running follow these simple example steps.
+Um die Applikation lokal zu installieren und zu starten müssen folgende Schritte befolgt werden.
 
-### Prerequisites
+### Voraussetzungen
 
-This is an example of how to list things you need to use the software and how to install them.
-* npm
+* npm muss installiert sein
   ```sh
   npm install npm@latest -g
   ```
 
 ### Installation
-
-_Below is an example of how you can instruct your audience on installing and setting up your app. This template doesn't rely on any external dependencies or services._
-
-1. Get a free API Key at [https://example.com](https://example.com)
-2. Clone the repo
-   ```sh
-   git clone https://github.com/your_username_/Project-Name.git
-   ```
-3. Install NPM packages
+ 
+NPM Pakete installieren
    ```sh
    npm install
    ```
-4. Enter your API in `config.js`
-   ```js
-   const API_KEY = 'ENTER YOUR API';
+
+### Start
+Backend starten aus dem root Verzeichnis
+
+```sh
+node backend.js
    ```
 
-
-
 <!-- USAGE EXAMPLES -->
-## Usage
+## Nutzung
 
+Nachdem die Anwendung gestartet wurde, kann im Browser unter ``http://localhost:8080/`` die Übersichtsseite aufgerufen werden. 
+Diese stellt die Hauptseite der Applikation dar. Die Pfeiltasten können NICHT zur Navigation verwendet werden.
 
+###Übersichtsseite
+Auf der linken Seite befindet sich die Navigation zum Hauptmenü, welche auf jeder Seite angezeigt wird. 
+
+Zudem kann im 
+anliegenden Eingabefeld ein neuer Raumname eingegeben werden und mit dem Button `Create new Room` ein neuer Raum erstellt werden. Wird dieser gedrückt wird dem
+Nutzer die Canvas Ansicht angezeigt.
+
+Unter dem Eingabefeld ist eine Liste mit offenen Räumen zu sehen. Dabei werden auch erstellte Räume von anderen Nutzern angezeigt.
+Der erste Teil stellt den Namen des Raumes dar, wobei in Klammer zusätzlich die Id des Raumes angegeben wird. 
+Durch das Drücken eines Listeneintrags kann der Nutzer diesem Raum beitreten.
+
+###Zeichenansicht
+Auch hier kann über die Navigation auf der linken Seite zur Übersichtseite zurückgekehrt werden. 
+Es können zusätzlich zu Blatt2, Formen ausgewählt und anschließend bewegt werden. Dies ist nur möglich, wenn exakt eine Form ausgewählt wurde.
+
+Selektierte Formen von anderen Nutzern werden mit roten Kästen markiert und sind für andere Nutzer blockiert, wobei die eigenen blau markiert werden. 
+Während einer Session kann jederzeit die Seite neu geladen werden.
+Verlässt ein User einen Raum und hat noch Formen selektiert, werden diese im Anschluss automatisch wieder freigegeben.
 
 
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
-
-Use this space to list resources you find helpful and would like to give credit to. I've included a few of my favorites to kick things off!
-
-* [Choose an Open Source License](https://choosealicense.com)
+* [Best-README-Template](https://github.com/othneildrew/Best-README-Template/blob/master/README.md)
+* [Build a Single Page Application with JavaScript (No Frameworks)](https://www.youtube.com/watch?v=6BozpmSjk-Y&ab_channel=dcode)
