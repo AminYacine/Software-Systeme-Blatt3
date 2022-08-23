@@ -277,13 +277,13 @@ export class Canvas {
         // selected shape is deleted from the map so the position can be changed
         this.sendEvent(new CanvasEvent(EventTypes.ShapeRemoved, Canvas.getShapeType(shapeToMove), shapeToMove));
         //added to selected shapes because after delete shape is removed from selected shapes
-        this.selectedShapes.push(shapeToMove);
         if (toForeGround) {
             this.sendEvent(new CanvasEvent(EventTypes.ShapeAdded, Canvas.getShapeType(shapeToMove), shapeToMove));
         }
         else {
             this.sendEvent(new CanvasEvent(EventTypes.MovedToBackground, Canvas.getShapeType(shapeToMove), shapeToMove));
         }
+        this.sendEvent(new CanvasEvent(EventTypes.ShapeSelected, Canvas.getShapeType(shapeToMove), shapeToMove));
     }
     /**
      * method to save a standard state for the drawing context

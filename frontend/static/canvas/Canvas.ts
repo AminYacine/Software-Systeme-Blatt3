@@ -3,8 +3,8 @@ import {ToolArea} from "../models/ToolArea.js";
 import {MenuApi} from "./menuApi.js";
 import {Menu} from "./menu.js";
 import {CanvasEvent} from "../models/CanvasEvent.js";
-import { EventTypes} from "../enums/EventTypes.js";
-import { ShapeTypes} from "../enums/ShapeTypes.js";
+import {EventTypes} from "../enums/EventTypes.js";
+import {ShapeTypes} from "../enums/ShapeTypes.js";
 import {getClientId, sendCanvasEvent} from "../WebSocketService.js";
 import {Circle, Line, Rectangle, Triangle} from "./Shapes.js";
 
@@ -350,13 +350,12 @@ export class Canvas implements ShapeManager {
         // selected shape is deleted from the map so the position can be changed
         this.sendEvent(new CanvasEvent(EventTypes.ShapeRemoved, Canvas.getShapeType(shapeToMove), shapeToMove));
         //added to selected shapes because after delete shape is removed from selected shapes
-        this.selectedShapes.push(shapeToMove);
-
         if (toForeGround) {
             this.sendEvent(new CanvasEvent(EventTypes.ShapeAdded, Canvas.getShapeType(shapeToMove), shapeToMove));
         } else {
             this.sendEvent(new CanvasEvent(EventTypes.MovedToBackground, Canvas.getShapeType(shapeToMove), shapeToMove));
         }
+        this.sendEvent(new CanvasEvent(EventTypes.ShapeSelected, Canvas.getShapeType(shapeToMove), shapeToMove));
     }
 
     /**
