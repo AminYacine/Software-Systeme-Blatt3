@@ -30,7 +30,6 @@ export class WsService {
      */
     handleMessage(message: string, client: WebSocket) {
         const event: AbstractEventDTO = JSON.parse(message);
-        console.log("received message: ", event.type);
 
         switch (event.type) {
             case WebSocketEvents.CreateCanvas: {
@@ -160,7 +159,6 @@ export class WsService {
     private handleRegisterForCanvas(client: WebSocket, registerEvent: RegisterForCanvasEventDTO) {
         const canvasId = registerEvent.canvasId;
         const clientId = registerEvent.clientId;
-        console.log("server: got register event", canvasId);
         if (canvasId !== undefined && clientId !== undefined) {
             const room = this.canvasRooms.get(canvasId);
             if (room) {
@@ -171,7 +169,6 @@ export class WsService {
                         WebSocketEvents.RegisteredForCanvas,
                         new RegisteredForCanvasEventDTO(canvasId)
                     );
-                    console.log("send registeredEvent");
                 }
             }
         }
@@ -184,7 +181,6 @@ export class WsService {
      * @private
      */
     private handleDeregisterForCanvas(client: WebSocket, deregisterEvent: DeregisterFromCanvasEventDTO) {
-        console.log("in handle deregister");
         const canvasId = deregisterEvent.canvasId;
         const clientId = deregisterEvent.clientId;
         if (canvasId) {
@@ -195,7 +191,6 @@ export class WsService {
                     if (clientIdOfShape === clientId) {
                         room.selectedShapes.delete(shapeId);
                         const shape = room.shapesInCanvas.get(shapeId);
-                        console.log("unselected shapes by leaving", shape);
                         this.broadCastEvent(
                             room.getClientsExcept(clientId),
                             WebSocketEvents.CanvasChangedEvent,
@@ -224,8 +219,6 @@ export class WsService {
                 const events = room.getCurrentEvents();
                 const res = new GetCanvasEventsResponseDTO(canvasId, events, Object.fromEntries(room.getSelectedShapes()));
                 this.sendToClient(client, WebSocketEvents.GetCanvasEventsResponse, res);
-
-                console.log("send selected shapes", res)
             }
         }
     }
@@ -245,7 +238,6 @@ export class WsService {
         if (room !== undefined) {
             room.addEvent(roomEvent);
             const roomClients = room.getClientsExcept(clientId);
-
             this.broadCastEvent(roomClients, WebSocketEvents.CanvasChangedEvent, roomEvent);
         }
     }

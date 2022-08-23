@@ -502,7 +502,6 @@ export class Canvas implements ShapeManager {
     private isShapeBlocked(shapeId: string): boolean {
         for (let blockedShape of this.blockedShapes) {
             if (blockedShape.id === shapeId) {
-                console.log("shape blocked", shapeId)
                 return true;
             }
         }

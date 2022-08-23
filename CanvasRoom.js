@@ -56,7 +56,6 @@ export class CanvasRoom {
                 break;
             }
         }
-        console.log("selectedShapes", this._selectedShapes);
     }
     getCurrentEvents() {
         return Array.from(this.eventsInCanvas.values());
@@ -75,7 +74,6 @@ export class CanvasRoom {
     }
     updateClientSession(clientId, session) {
         if (this.clients.has(clientId)) {
-            console.log("client updated", clientId);
             this.addSession(clientId, session);
         }
     }

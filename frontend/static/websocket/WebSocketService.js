@@ -12,15 +12,12 @@ let canvas;
 export async function openConnection() {
     ws = new WebSocket('ws://localhost:8080/web-socket');
     ws.onopen = (event) => {
-        console.log("Open", event.type);
     };
     ws.onclose = (event) => {
-        console.log("Close", event);
     };
     //when the backend sends a message it will be handled here depending on the type
     ws.onmessage = (message) => {
         let msg = JSON.parse(message.data);
-        console.log("event:", msg);
         switch (msg.type) {
             case WebSocketEvents.CanvasCreated: {
                 handleCanvasCreated(msg.value);
@@ -51,7 +48,6 @@ export async function openConnection() {
  * @param createdEvent
  */
 function handleCanvasCreated(createdEvent) {
-    console.log("received canvas created", createdEvent);
     openRooms.push(new CanvasRoom(createdEvent.name, createdEvent.id));
     // if the current user created the event, the view is changed to canvas view
     // else the open room list in the overview is updated so the user can see the new room
@@ -82,7 +78,6 @@ function handleRegisteredForCanvas(registeredEvent) {
 function handleCreatedClient(connectedEvent) {
     const currentClientID = getClientId();
     if (!currentClientID) {
-        console.log("noch keine id");
         setClientId(connectedEvent.clientId);
     }
     sendEvent(WebSocketEvents.SessionID, getClientId());
@@ -131,7 +126,6 @@ function handleGetCanvasEventsResponse(roomEvents) {
             }
             //Draw shapes to update all blocked shapes in ui
             canvas.drawBackground();
-            console.log("set blocked shapes", canvas.blockedShapes);
         }
     }
 }
@@ -156,7 +150,6 @@ export function initOverviewUI() {
  * @param roomId
  */
 export function containsRoom(roomId) {
-    console.log("in containsRoom");
     const foundRoom = openRooms.find(room => roomId === room.id);
     return foundRoom !== undefined;
 }
@@ -189,7 +182,6 @@ export function getClientId() {
  * Sets the clientId to the session storage.
  */
 function setClientId(clientId) {
-    console.log("clientId set:", clientId);
     sessionStorage.setItem("clientID", clientId.toString());
 }
 /**

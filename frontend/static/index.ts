@@ -50,7 +50,6 @@ export const router = async () => {
         // Else the not found view is displayed
         await wss.openConnection();
         const isPathOk = checkCanvasPath();
-        console.log("isIdOk", isPathOk);
         if (isPathOk) {
             document.querySelector("#main-page").innerHTML = view.render();
             sendGetCanvasEvents();
@@ -67,7 +66,6 @@ export const router = async () => {
         await wss.openConnection();
 
         if (getCurrentCanvasRoom()) {
-            console.log("sent deregister")
             sendDeregisterFromCanvasEvent();
             wss.removeCurrentCanvasRoom();
         }

@@ -69,8 +69,6 @@ export class CanvasRoom {
                 break;
             }
         }
-        console.log("selectedShapes", this._selectedShapes);
-
     }
 
 
@@ -95,7 +93,6 @@ export class CanvasRoom {
 
     updateClientSession(clientId: number, session: WebSocket) {
         if (this.clients.has(clientId)) {
-            console.log("client updated", clientId)
             this.addSession(clientId, session);
         }
     }
