@@ -81,6 +81,12 @@ Selektierte Formen von anderen Nutzern werden mit roten Kästen markiert und sin
 Während einer Session kann jederzeit die Seite neu geladen werden.
 Verlässt ein User einen Raum und hat noch Formen selektiert, werden diese im Anschluss automatisch wieder freigegeben.
 
+###Notiz
+Die Shape Ids werden aus einer Zusammensetzung von Userid und einer Zahl, die hochgezählt wird, generiert.
+Zur Erstellung der Raum Ids wird das Paket uuid verwendet.
+
+Sobald ein Nutzer die Website aufruft, wird eine Session erstellt. Diese läuft erst ab, wenn der Nutzer den Tab mit der Anwendung schließt. 
+Die Session Daten werden im Session Storage gespeichert.
 
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
