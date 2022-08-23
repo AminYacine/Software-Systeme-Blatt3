@@ -1,7 +1,11 @@
-import * as wss from "./WebSocketService.js";
+import * as wss from "./websocket/WebSocketService.js";
 import { Overview } from "./views/overview.js";
 import { CanvasView } from "./views/canvasView.js";
 import { NotFoundView } from "./views/notFoundView.js";
+import { sendDeregisterFromCanvasEvent, sendGetCanvasEvents } from "./websocket/WebSocketHelper.js";
+/**
+ * Checks the pathname and initiates the appropriate view.
+ */
 //source: https://www.youtube.com/watch?v=6BozpmSjk-Y&ab_channel=dcode
 export const router = async () => {
     const routes = [
@@ -9,6 +13,7 @@ export const router = async () => {
         { path: "/canvas", view: CanvasView },
         { path: "/404", view: NotFoundView },
     ];
+    // checks wich route matches the current path
     const potentialMatches = routes.map((route) => {
         if (route.path === "/canvas") {
             return {
@@ -30,15 +35,18 @@ export const router = async () => {
             };
         }
     });
+    // route that matches path is set
     let match = potentialMatches.find((potentialMatch) => potentialMatch.isMatch);
     const view = new match.route.view();
     if (view instanceof CanvasView) {
+        // If the canvas id in the path matches any of the list the canvas view is rendered.
+        // Else the not found view is displayed
         await wss.openConnection();
         const isPathOk = checkCanvasPath();
         console.log("isIdOk", isPathOk);
         if (isPathOk) {
             document.querySelector("#main-page").innerHTML = view.render();
-            wss.sendGetCanvasEvents();
+            sendGetCanvasEvents();
             wss.initCanvasView();
         }
         else {
@@ -47,11 +55,15 @@ export const router = async () => {
         }
     }
     else if (view instanceof Overview) {
+        //overview is rendered
         document.querySelector("#main-page").innerHTML = view.render();
         wss.initOverviewUI();
         await wss.openConnection();
-        wss.deregisterFromCanvas();
+        sendDeregisterFromCanvasEvent();
     }
+    /**
+     * checks if the id in the path matches any of the canvas list ids
+     */
     function checkCanvasPath() {
         const path = location.pathname;
         const id = path.substring(path.lastIndexOf('/') + 1);
@@ -69,9 +81,5 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
     router();
-});
-//to clear storage when window is closed
-window.addEventListener("load", () => {
-    console.log("onload");
 });
 //# sourceMappingURL=index.js.map

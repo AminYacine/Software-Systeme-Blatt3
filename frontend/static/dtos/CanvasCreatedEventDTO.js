@@ -1,8 +1,8 @@
-export class CanvasCreatedEvent {
+export class CanvasCreatedEventDTO {
     constructor(id, name, clientId) {
         this.id = id;
         this.name = name;
         this.clientId = clientId;
     }
 }
-//# sourceMappingURL=CanvasCreatedEvent.js.map
+//# sourceMappingURL=CanvasCreatedEventDTO.js.map

@@ -1,4 +1,4 @@
-import { getClientId } from "../WebSocketService.js";
+import { getClientId } from "../websocket/WebSocketService.js";
 export class Point2D {
     constructor(x, y) {
         this.x = x;

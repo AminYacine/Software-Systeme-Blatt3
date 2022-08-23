@@ -1,11 +1,11 @@
 import * as WebSocket from "ws";
 import {AbstractEventDTO} from "./frontend/static/dtos/AbstractEventDTO.js";
 import {RegisteredForCanvasEventDTO} from "./frontend/static/dtos/RegisteredForCanvasEventDTO.js";
-import {CanvasCreatedEvent} from "./ws-events/CanvasCreatedEvent.js";
+import {CanvasCreatedEventDTO} from "./frontend/static/dtos/CanvasCreatedEventDTO.js";
 import {WebSocketEvents} from "./frontend/static/enums/WebSocketEvents.js";
 import {RegisterForCanvasEventDTO} from "./frontend/static/dtos/RegisterForCanvasEventDTO.js";
 import {CanvasRoom} from "./CanvasRoom.js";
-import {ConnectedEvent} from "./ConnectedEvent.js";
+import {ConnectedEventDTO} from "./frontend/static/dtos/ConnectedEventDTO.js";
 import {CreateCanvasEventDTO} from "./frontend/static/dtos/CreateCanvasEventDTO.js";
 import {DeregisterFromCanvasEventDTO} from "./frontend/static/dtos/DeregisterFromCanvasEventDTO.js";
 import {RoomEvent} from "./frontend/static/models/RoomEvent.js";
@@ -66,7 +66,7 @@ export class WsService {
     handleConnection(client: WebSocket.WebSocket) {
         this.sendToClient(client,
             WebSocketEvents.CreatedClientId,
-            new ConnectedEvent(this.getNewClientID(), Array.from(this.canvasRooms.values())));
+            new ConnectedEventDTO(this.getNewClientID(), Array.from(this.canvasRooms.values())));
     }
 
     /**
@@ -143,7 +143,7 @@ export class WsService {
 
                 this.broadCastEvent(this.getAllClients(),
                     WebSocketEvents.CanvasCreated,
-                    new CanvasCreatedEvent(canvas.id, canvasName, clientId)
+                    new CanvasCreatedEventDTO(canvas.id, canvasName, clientId)
                 );
             }
         }

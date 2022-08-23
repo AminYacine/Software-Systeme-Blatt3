@@ -14,15 +14,6 @@ export class CanvasEvent {
         this.type = type;
         this.shapeType = shapeType;
         this.shape = shape;
-        // this.user = user;
         this.eventId = CanvasEvent.counter++;
     }
-
-    copy(): CanvasEvent {
-        console.log("in copy event", this);
-        const copyEvent = new CanvasEvent(this.type, this.shapeType, this.shape.copyShape());
-        copyEvent.eventId--;
-        return copyEvent;
-    }
-
 }

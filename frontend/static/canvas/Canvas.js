@@ -2,7 +2,8 @@ import { MenuApi } from "./menuApi.js";
 import { CanvasEvent } from "../models/CanvasEvent.js";
 import { EventTypes } from "../enums/EventTypes.js";
 import { ShapeTypes } from "../enums/ShapeTypes.js";
-import { getClientId, sendCanvasEvent } from "../WebSocketService.js";
+import { getClientId } from "../websocket/WebSocketService.js";
+import { sendCanvasEvent } from "../websocket/WebSocketHelper.js";
 import { Circle, Line, Rectangle, Triangle } from "./Shapes.js";
 export class Canvas {
     constructor(creationCanvasDomElement, backgroundCanvasDomElement, toolArea) {
@@ -116,6 +117,12 @@ export class Canvas {
             shape.draw(this.ctx, isSelectedOrBlocked, markingColor);
         });
     }
+    /**
+     * adds shapes to the background or creation canvas depending on if it is finished or not
+     * @param shape
+     * @param shapeFinished
+     * @param needsSelection
+     */
     addShape(shape, shapeFinished, needsSelection) {
         //if the shape is finished, it will be added to the backgroundShapes and the creationCanvas will be reset
         if (shapeFinished) {
@@ -134,6 +141,11 @@ export class Canvas {
             this.drawCreationCanvas();
         }
     }
+    /**
+     * used to make shape transparent before it will be moved in the creation canvas
+     * after the movement is complete the transparent shape is replaced with a new one at a different position
+     * @param shape
+     */
     makeShapeTransparent(shape) {
         const backgroundShape = this._backGroundShapes.get(shape.id);
         backgroundShape.setFillColor("transparent");
@@ -309,7 +321,7 @@ export class Canvas {
         this.ctx = this.backgroundCanvasDomElement.getContext("2d");
     }
     /**
-     * method to add an event to the stream
+     * Sends the event to the backend and handles it
      * @param event
      */
     sendEvent(event) {
@@ -317,24 +329,25 @@ export class Canvas {
         this.handleEvent(event, getClientId());
     }
     /**
-     * method that handles incoming events from the socket instance
+     * Handles incoming events from the socket instance
      * @param event received CanvasEvent
-     * @param userId userId of the incoming event
+     * @param clientId clientId of the incoming event
      */
-    handleEvent(event, userId) {
-        const fromCurrentUser = userId === getClientId();
-        let eventShape = event.shape;
-        console.log(eventShape.id);
-        //only needs to generate new instance if event is not from current user
-        eventShape = Canvas.getSpecificShape(event);
+    handleEvent(event, clientId) {
+        //if the event is from the current user
+        const fromCurrentUser = clientId === getClientId();
+        //gets an instance of a specific shape i.e. triangle, circle, etc
+        let eventShape = Canvas.getSpecificShape(event);
         switch (event.type) {
             case EventTypes.ShapeRemoved: {
+                // removes shape from background, selected and blocked array
                 this._backGroundShapes.delete(eventShape.id);
                 this.selectedShapes = this.selectedShapes.filter(shape => shape.id !== eventShape.id);
                 this.blockedShapes = this.blockedShapes.filter(shape => shape.id !== eventShape.id);
                 break;
             }
             case EventTypes.ShapeAdded: {
+                // adds shape to background array
                 this._backGroundShapes.set(eventShape.id, eventShape);
                 break;
             }
@@ -349,9 +362,10 @@ export class Canvas {
             case EventTypes.ShapeUnselected: {
                 const shape = this._backGroundShapes.get(eventShape.id);
                 if (shape !== undefined) {
+                    // if current user unselects, the shape is removed from the selectedShapes array
+                    // else the shape is no longer blocked from other users
                     if (fromCurrentUser) {
                         this.selectedShapes = this.selectedShapes.filter(shape => shape.id !== eventShape.id);
-                        console.log("unselected");
                     }
                     else {
                         this.blockedShapes = this.blockedShapes.filter(shape => shape.id !== eventShape.id);
@@ -366,7 +380,6 @@ export class Canvas {
                     // blocked for selection
                     if (fromCurrentUser) {
                         this.selectedShapes.push(shape);
-                        console.log("selected");
                     }
                     else {
                         this.blockedShapes.push(shape);
@@ -375,8 +388,14 @@ export class Canvas {
                 break;
             }
         }
+        //always draw background after event to see changes
         this.drawBackground();
     }
+    /**
+     * Returns an instance of the shape provided in the event
+     * @param event
+     * @private
+     */
     static getSpecificShape(event) {
         switch (event.shapeType) {
             case ShapeTypes.Line: {
@@ -393,6 +412,11 @@ export class Canvas {
             }
         }
     }
+    /**
+     * Returns true if the provided shape is in the blocked array
+     * @param shapeId
+     * @private
+     */
     isShapeBlocked(shapeId) {
         for (let blockedShape of this.blockedShapes) {
             if (blockedShape.id === shapeId) {
@@ -402,6 +426,10 @@ export class Canvas {
         }
         return false;
     }
+    /**
+     * helper method to get the shape type
+     * @param shape
+     */
     static getShapeType(shape) {
         if (shape instanceof Line) {
             return ShapeTypes.Line;

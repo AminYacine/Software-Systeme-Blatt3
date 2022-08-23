@@ -66,9 +66,6 @@ export class CanvasRoom {
 
     }
 
-    removeEvent(id: string) {
-        this.eventsInCanvas.delete(id);
-    }
 
     getCurrentEvents(): RoomEvent[] {
        return Array.from(this.eventsInCanvas.values());

@@ -52,9 +52,6 @@ export class CanvasRoom {
         }
         console.log("selectedShapes", this.selectedShapes);
     }
-    removeEvent(id) {
-        this.eventsInCanvas.delete(id);
-    }
     getCurrentEvents() {
         return Array.from(this.eventsInCanvas.values());
     }
