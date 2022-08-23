@@ -20,18 +20,20 @@
 
 <!-- ABOUT THE PROJECT -->
 ## Über das Projekt
-This project has 
+Dieses Projekt ist die Implementierung des dritten Aufgabenblattes des Moduls Softwaresysteme 
+und enthält alle drei Unteraufgaben.
 
+Das Backend wurde mit dem Paketmanager Node und dem Framework Express aufgesetzt. 
+Das Frontend wurde als Single Page Applikation implementiert. 
 
-
-This section should list any major frameworks/libraries used to bootstrap your project. Leave any add-ons/plugins for the acknowledgements section. Here are a few examples.
-
-
+Verwendete Pakete:
+* ws 
+* uuid
 
 
 <!-- GETTING STARTED -->
 ## Getting Started
-
+Um die Applikation zu starte 
 This is an example of how you may give instructions on setting up your project locally.
 To get a local copy up and running follow these simple example steps.
 
