@@ -3,6 +3,7 @@ import {Overview} from "./views/overview.js";
 import {CanvasView} from "./views/canvasView.js";
 import {NotFoundView} from "./views/notFoundView.js";
 import {sendDeregisterFromCanvasEvent, sendGetCanvasEvents} from "./websocket/WebSocketHelper.js";
+import {getCurrentCanvasRoom} from "./websocket/WebSocketService.js";
 
 /**
  * Checks the pathname and initiates the appropriate view.
@@ -61,13 +62,18 @@ export const router = async () => {
         document.querySelector("#main-page").innerHTML = view.render();
         wss.initOverviewUI();
         await wss.openConnection();
-        sendDeregisterFromCanvasEvent();
+
+        if (getCurrentCanvasRoom()) {
+            console.log("sent deregister")
+            sendDeregisterFromCanvasEvent();
+            wss.removeCurrentCanvasRoom();
+        }
     }
 
     /**
      * checks if the id in the path matches any of the canvas list ids
      */
-     function checkCanvasPath(): boolean {
+    function checkCanvasPath(): boolean {
         const path = location.pathname;
         const id = path.substring(path.lastIndexOf('/') + 1);
         return wss.containsRoom(id);

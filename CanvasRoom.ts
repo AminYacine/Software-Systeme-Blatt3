@@ -1,17 +1,24 @@
 import * as WebSocket from "ws";
 import {v4} from "uuid";
-import { EventTypes} from "./frontend/static/enums/EventTypes.js";
+import {EventTypes} from "./frontend/static/enums/EventTypes.js";
 import {Shape} from "./frontend/static/canvas/types.js";
 import {RoomEvent} from "./frontend/static/models/RoomEvent.js";
 
 export class CanvasRoom {
     id: string;
     private clients: Map<number, WebSocket> = new Map();
-    private shapesInCanvas: Map<string, Shape> = new Map();
-    private selectedShapes: Map<string, number> = new Map();
+    private _shapesInCanvas: Map<string, Shape> = new Map();
+    private _selectedShapes: Map<string, number> = new Map();
 
     private eventsInCanvas: Map<string, RoomEvent> = new Map();
 
+    get shapesInCanvas(): Map<string, Shape> {
+        return this._shapesInCanvas;
+    }
+
+    get selectedShapes(): Map<string, number> {
+        return this._selectedShapes;
+    }
 
     constructor(public name: string) {
         //generates a random uuid
@@ -33,20 +40,20 @@ export class CanvasRoom {
 
         switch (canvasEvent.type) {
             case EventTypes.ShapeAdded: {
-                this.shapesInCanvas.set(shape.id, shape);
+                this._shapesInCanvas.set(shape.id, shape);
                 this.eventsInCanvas.set(shape.id, roomEvent);
                 break;
             }
             case EventTypes.ShapeRemoved: {
-                this.shapesInCanvas.delete(shape.id);
+                this._shapesInCanvas.delete(shape.id);
                 this.eventsInCanvas.delete(shape.id);
-                this.selectedShapes.delete(shape.id);
+                this._selectedShapes.delete(shape.id);
                 break;
             }
             case EventTypes.MovedToBackground: {
                 const helperMap: Map<string, Shape> = new Map();
                 helperMap.set(shape.id, shape);
-                this.shapesInCanvas = new Map([...helperMap, ...this.shapesInCanvas]);
+                this._shapesInCanvas = new Map([...helperMap, ...this._shapesInCanvas]);
 
                 const helperMap2: Map<string, RoomEvent> = new Map();
                 helperMap2.set(shape.id, roomEvent);
@@ -54,21 +61,21 @@ export class CanvasRoom {
                 break;
             }
             case EventTypes.ShapeSelected: {
-                this.selectedShapes.set(shape.id, clientId);
+                this._selectedShapes.set(shape.id, clientId);
                 break;
             }
             case EventTypes.ShapeUnselected: {
-                this.selectedShapes.delete(shape.id);
+                this._selectedShapes.delete(shape.id);
                 break;
             }
         }
-        console.log("selectedShapes", this.selectedShapes);
+        console.log("selectedShapes", this._selectedShapes);
 
     }
 
 
     getCurrentEvents(): RoomEvent[] {
-       return Array.from(this.eventsInCanvas.values());
+        return Array.from(this.eventsInCanvas.values());
     }
 
     getClientsExcept(clientId: number): WebSocket[] {
@@ -83,6 +90,6 @@ export class CanvasRoom {
     }
 
     getSelectedShapes() {
-        return this.selectedShapes;
+        return this._selectedShapes;
     }
 }

@@ -1,9 +1,11 @@
 import {Point2D} from "./Shapes.js";
+import {ShapeTypes} from "../enums/ShapeTypes";
 
 export interface Shape {
     readonly id: string;
     fillColor: string;
     strokeColor: string;
+    type: ShapeTypes;
 
     draw(ctx: CanvasRenderingContext2D, isSelected: boolean, selectionColor: string);
 

@@ -4,7 +4,10 @@ import { CanvasCreatedEventDTO } from "./frontend/static/dtos/CanvasCreatedEvent
 import { WebSocketEvents } from "./frontend/static/enums/WebSocketEvents.js";
 import { CanvasRoom } from "./CanvasRoom.js";
 import { ConnectedEventDTO } from "./frontend/static/dtos/ConnectedEventDTO.js";
+import { RoomEvent } from "./frontend/static/models/RoomEvent.js";
 import { GetCanvasEventsResponseDTO } from "./frontend/static/dtos/GetCanvasEventsResponseDTO.js";
+import { CanvasEvent } from "./frontend/static/models/CanvasEvent.js";
+import { EventTypes } from "./frontend/static/enums/EventTypes.js";
 export class WsService {
     constructor() {
         this.clientIdCounter = 1;
@@ -41,7 +44,7 @@ export class WsService {
                 break;
             }
             case WebSocketEvents.CanvasEvent: {
-                this.handleCanvasEvent(client, event.value);
+                this.handleCanvasEvent(event.value);
                 break;
             }
         }
@@ -143,12 +146,21 @@ export class WsService {
      * @private
      */
     handleDeregisterForCanvas(client, deregisterEvent) {
+        console.log("in handle deregister");
         const canvasId = deregisterEvent.canvasId;
+        const clientId = deregisterEvent.clientId;
         if (canvasId) {
             const room = this.canvasRooms.get(canvasId);
             if (room) {
-                room.removeSession(deregisterEvent.clientId);
-                console.log("removed from canvas");
+                room.removeSession(clientId);
+                room.selectedShapes.forEach((clientIdOfShape, shapeId) => {
+                    if (clientIdOfShape === clientId) {
+                        room.selectedShapes.delete(shapeId);
+                        const shape = room.shapesInCanvas.get(shapeId);
+                        console.log("unselected shapes by leaving", shape);
+                        this.broadCastEvent(room.getClientsExcept(clientId), WebSocketEvents.CanvasChangedEvent, new RoomEvent(clientId, room.id, new CanvasEvent(EventTypes.ShapeUnselected, shape.type, shape)));
+                    }
+                });
             }
         }
     }
@@ -168,7 +180,7 @@ export class WsService {
     handleSessionIdEvent(client, id) {
         this.clients.set(id, client);
     }
-    handleCanvasEvent(client, roomEvent) {
+    handleCanvasEvent(roomEvent) {
         const roomId = roomEvent.roomId;
         const clientId = roomEvent.clientId;
         const room = this.canvasRooms.get(roomId);

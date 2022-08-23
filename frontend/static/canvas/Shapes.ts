@@ -1,5 +1,6 @@
 import {Shape, ShapeFactory, ShapeManager} from "./types.js";
 import {getClientId} from "../websocket/WebSocketService.js";
+import {ShapeTypes} from "../enums/ShapeTypes.js";
 
 export class Point2D {
     constructor(readonly x: number, readonly y: number) {
@@ -166,6 +167,7 @@ export class SelectionFactory implements ShapeFactory {
 export class Line extends AbstractShape implements Shape {
     // toleration of 10 for mouse click
     selectToleration: number = 10;
+    type: ShapeTypes = ShapeTypes.Line;
 
     constructor(readonly from: Point2D, readonly to: Point2D, specificId?: string) {
         super(specificId);
@@ -265,6 +267,7 @@ export class LineFactory extends AbstractFactory<Line> implements ShapeFactory {
 
 
 export class Circle extends AbstractShape implements Shape {
+    type: ShapeTypes = ShapeTypes.Circle;
     constructor(readonly center: Point2D, readonly radius: number, specificId?: string) {
         super(specificId);
     }
@@ -349,6 +352,7 @@ export class CircleFactory extends AbstractFactory<Circle> implements ShapeFacto
 
 
 export class Rectangle extends AbstractShape implements Shape {
+    type: ShapeTypes = ShapeTypes.Rectangle;
     constructor(readonly from: Point2D, readonly to: Point2D, specificId?: string) {
         super(specificId);
     }
@@ -452,6 +456,7 @@ export class RectangleFactory extends AbstractFactory<Rectangle> implements Shap
 
 
 export class Triangle extends AbstractShape implements Shape {
+    type: ShapeTypes = ShapeTypes.Triangle;
     constructor(readonly p1: Point2D, readonly p2: Point2D, readonly p3: Point2D, specificId?: string) {
         super(specificId);
     }

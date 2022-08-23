@@ -1,4 +1,5 @@
 import { getClientId } from "../websocket/WebSocketService.js";
+import { ShapeTypes } from "../enums/ShapeTypes.js";
 export class Point2D {
     constructor(x, y) {
         this.x = x;
@@ -136,6 +137,7 @@ export class Line extends AbstractShape {
         this.to = to;
         // toleration of 10 for mouse click
         this.selectToleration = 10;
+        this.type = ShapeTypes.Line;
     }
     copyShape(positionMovement) {
         const newLine = new Line(this.from.add(positionMovement), this.to.add(positionMovement), this.id);
@@ -210,6 +212,7 @@ export class Circle extends AbstractShape {
         super(specificId);
         this.center = center;
         this.radius = radius;
+        this.type = ShapeTypes.Circle;
     }
     copyShape(positionMovement) {
         const newCircle = new Circle(this.center.add(positionMovement), this.radius, this.id);
@@ -273,6 +276,7 @@ export class Rectangle extends AbstractShape {
         super(specificId);
         this.from = from;
         this.to = to;
+        this.type = ShapeTypes.Rectangle;
     }
     copyShape(positionMovement) {
         const newRectangle = new Rectangle(this.from.add(positionMovement), this.to.add(positionMovement), this.id);
@@ -358,6 +362,7 @@ export class Triangle extends AbstractShape {
         this.p1 = p1;
         this.p2 = p2;
         this.p3 = p3;
+        this.type = ShapeTypes.Triangle;
     }
     copyShape(positionMovement) {
         const newTriangle = new Triangle(this.p1.add(positionMovement), this.p2.add(positionMovement), this.p3.add(positionMovement), this.id);
