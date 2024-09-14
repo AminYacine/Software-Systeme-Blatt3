@@ -1,21 +1,15 @@
+## Inhaltsverzeichnis
 
-<!-- TABLE OF CONTENTS -->
-<details>
-  <summary>Inhaltsverzeichnis</summary>
-  <ol>
-    <li>
-      <a href="#about-the-project">Über das Projekt</a>
-    <li>
-      <a href="#getting-started">Getting Started</a>
-      <ul>
-        <li><a href="#prerequisites">Voraussetzungen</a></li>
-        <li><a href="#installation">Installation</a></li>
-      </ul>
-    </li>
-    <li><a href="#usage">Nutzung</a></li>
-  </ol>
-</details>
-
+  1. [Über das Projekt](#über-das-projekt)
+  2. [Getting Started](#getting-started)
+     - [Voraussetzungen](#voraussetzungen)
+     - [Installation](#installation-der-dependencies)
+     - [Start](#start)
+  3. [Nutzung](#nutzung)
+     - [Übersichtsseite](#startseite)
+     - [Zeichenansicht](#zeichenansicht)
+     - [Notiz](#notiz)
+  4. [Acknowledgments](#acknowledgments)
 
 
 <!-- ABOUT THE PROJECT -->
@@ -38,12 +32,12 @@ Um die Applikation lokal zu installieren und zu starten müssen folgende Schritt
 
 ### Voraussetzungen
 
-* npm muss installiert sein
+NPM muss installiert sein
   ```sh
   npm install npm@latest -g
   ```
 
-### Installation
+### Installation der Dependencies
  
 NPM Pakete installieren
    ```sh
@@ -60,10 +54,10 @@ node backend.js
 <!-- USAGE EXAMPLES -->
 ## Nutzung
 
-Nachdem die Anwendung gestartet wurde, kann im Browser unter [http://localhost:8080/](http://localhost:8080/) die Übersichtsseite aufgerufen werden. 
+Nachdem die Anwendung gestartet wurde, kann im Browser unter [http://localhost:8080/](http://localhost:8080/) die Startseite aufgerufen werden. 
 Diese stellt die Hauptseite der Applikation dar. Die Pfeiltasten können NICHT zur Navigation verwendet werden.
 
-### Übersichtsseite
+### Startseite
 Auf der linken Seite befindet sich die Navigation zum Hauptmenü, welche auf jeder Seite angezeigt wird. 
 
 Zudem kann im 
