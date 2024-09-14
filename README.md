@@ -20,14 +20,15 @@
 
 <!-- ABOUT THE PROJECT -->
 ## Über das Projekt
-Dieses Projekt ist die Implementierung des dritten Aufgabenblattes des Moduls Softwaresysteme 
-und enthält alle drei Unteraufgaben.
+Dieses Projekt wurde im Rahmen des Kurses „Softwaresysteme“ entwickelt. 
+Es ermöglicht mehreren Nutzern, in gemeinsam genutzten Zeichenräumen Formen zu erstellen, zu zeichnen und zu verändern. 
+Nutzer können neue Räume erstellen oder bestehenden Räumen beitreten, um in Echtzeit zusammenzuarbeiten.
 
-Das Backend wurde mit dem Paketmanager Node und dem Framework Express aufgesetzt. 
-Das Frontend wurde als Single Page Applikation implementiert. 
+Das Backend basiert auf Node.js und dem Express-Framework, während das Frontend als Single Page Applikation realisiert wurde. 
+Die Anwendung nutzt WebSockets für die Echtzeitkommunikation zwischen den Nutzern.
 
 Verwendete Pakete:
-* ws 
+* ws
 * uuid
 
 
@@ -59,10 +60,10 @@ node backend.js
 <!-- USAGE EXAMPLES -->
 ## Nutzung
 
-Nachdem die Anwendung gestartet wurde, kann im Browser unter ``http://localhost:8080/`` die Übersichtsseite aufgerufen werden. 
+Nachdem die Anwendung gestartet wurde, kann im Browser unter [http://localhost:8080/](http://localhost:8080/) die Übersichtsseite aufgerufen werden. 
 Diese stellt die Hauptseite der Applikation dar. Die Pfeiltasten können NICHT zur Navigation verwendet werden.
 
-###Übersichtsseite
+### Übersichtsseite
 Auf der linken Seite befindet sich die Navigation zum Hauptmenü, welche auf jeder Seite angezeigt wird. 
 
 Zudem kann im 
@@ -73,15 +74,16 @@ Unter dem Eingabefeld ist eine Liste mit offenen Räumen zu sehen. Dabei werden 
 Der erste Teil stellt den Namen des Raumes dar, wobei in Klammer zusätzlich die Id des Raumes angegeben wird. 
 Durch das Drücken eines Listeneintrags kann der Nutzer diesem Raum beitreten.
 
-###Zeichenansicht
-Auch hier kann über die Navigation auf der linken Seite zur Übersichtseite zurückgekehrt werden. 
-Es können zusätzlich zu Blatt2, Formen ausgewählt und anschließend bewegt werden. Dies ist nur möglich, wenn exakt eine Form ausgewählt wurde.
+### Zeichenansicht
+In der Zeichenansicht kann der Nutzer verschiedene Formen auswählen und auf dem Canvas zeichnen. 
+Sobald eine Form ausgewählt ist, kann diese durch Ziehen auf dem Canvas erstellt werden. 
+Wenn das Auswahlwerkzeug aktiviert ist, können bereits gezeichnete Formen ausgewählt, verändert oder gelöscht werden.
 
-Selektierte Formen von anderen Nutzern werden mit roten Kästen markiert und sind für andere Nutzer blockiert, wobei die eigenen blau markiert werden. 
-Während einer Session kann jederzeit die Seite neu geladen werden.
-Verlässt ein User einen Raum und hat noch Formen selektiert, werden diese im Anschluss automatisch wieder freigegeben.
+Selektierte Formen von anderen Nutzern werden mit roten Kästen markiert und sind für andere Nutzer blockiert, während die eigenen Formen blau hervorgehoben werden. 
+Während einer Session kann jederzeit die Seite neu geladen werden. 
+Verlässt ein Nutzer einen Raum und hat noch Formen selektiert, werden diese im Anschluss automatisch wieder freigegeben.
 
-###Notiz
+### Notiz
 Die Shape Ids werden aus einer Zusammensetzung von Userid und einer Zahl, die hochgezählt wird, generiert.
 Zur Erstellung der Raum Ids wird das Paket uuid verwendet.
 
